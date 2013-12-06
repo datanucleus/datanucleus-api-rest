@@ -27,9 +27,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:svn://andy_jefferson@svn.code.sf.net/p/datanucleus/code/platform/api.rest/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://andy_jefferson@svn.code.sf.net/p/datanucleus/code/platform/api.rest/trunk</developerConnection>
-        <url>http://svn.code.sf.net/p/datanucleus/code/platform/api.rest/trunk</url>
+        <connection>scm:git:git://github.com/datanucleus/datanucleus-api-rest.git</connection>
+        <url>scm:git:git://github.com/datanucleus/datanucleus-api-rest.git</url>
+        <developerConnection>scm:git:git://github.com/datanucleus/datanucleus-api-rest.git</developerConnection>
     </scm>
 
     <developers>
