@@ -17,7 +17,6 @@
     </description>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdo.version>3.0</jdo.version>
         <dn.core.version>3.2.4</dn.core.version>
         <dn.api.jdo.version>3.2.3</dn.api.jdo.version>
