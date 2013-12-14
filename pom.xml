@@ -69,6 +69,7 @@
                             org.datanucleus*;version="${dn.core.version}",
                             *;resolution:=optional
                         </Import-Package>
+                        <Export-Package>org.datanucleus.api.rest*,!org.json*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
