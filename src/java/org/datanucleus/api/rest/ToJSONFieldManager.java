@@ -21,7 +21,6 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 
 import org.datanucleus.ExecutionContext;
-import org.datanucleus.NucleusContext;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
@@ -35,7 +34,6 @@ import org.json.JSONObject;
  */
 public class ToJSONFieldManager extends AbstractFieldManager
 {
-    NucleusContext nucCtx;
     JSONObject jsonobj;
     AbstractClassMetaData cmd;
     ExecutionContext ec;
@@ -45,7 +43,6 @@ public class ToJSONFieldManager extends AbstractFieldManager
         this.jsonobj = jsonobj;
         this.ec = ec;
         this.cmd = cmd;
-        this.nucCtx = ec.getNucleusContext();
     }
 
     public void storeBooleanField(int fieldNumber, boolean value)

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datanucleus.ExecutionContext;
-import org.datanucleus.NucleusContext;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
@@ -35,7 +34,6 @@ import org.json.JSONObject;
  */
 public class FromJSONFieldManager extends AbstractFieldManager
 {
-    NucleusContext nucCtx;
     JSONObject jsonobj;
     AbstractClassMetaData cmd;
     ExecutionContext ec;
@@ -51,7 +49,6 @@ public class FromJSONFieldManager extends AbstractFieldManager
         this.jsonobj = jsonobj;
         this.cmd = cmd;
         this.ec = ec;
-        this.nucCtx = ec.getNucleusContext();
     }
 
     public FromJSONFieldManager(JSONObject jsonobj, AbstractClassMetaData cmd, ObjectProvider op)
@@ -60,7 +57,6 @@ public class FromJSONFieldManager extends AbstractFieldManager
         this.cmd = cmd;
         this.op = op;
         this.ec = op.getExecutionContext();
-        this.nucCtx = ec.getNucleusContext();
     }
 
     public String fetchStringField(int position)
