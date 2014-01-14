@@ -190,18 +190,26 @@ public class RestServlet extends HttpServlet
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
     {
+        // Retrieve any fetch group that needs applying to the fetch
+        String fetchParam = req.getParameter("fetch");
+
         try
         {
             String token = getNextTokenAfterSlash(req);
             if (token.equalsIgnoreCase("query") || token.equalsIgnoreCase("jdoql"))
             {
-                // GET "/query?the_query_details" where "the_query_details" is SELECT FROM ... WHERE ... ORDER BY ...
+                // GET "/query?the_query_details" or GET "/jdoql?the_query_details" where "the_query_details" is "SELECT FROM ... WHERE ... ORDER BY ..."
                 String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
+
                     Query query = pm.newQuery("JDOQL", queryString);
+                    if (fetchParam != null)
+                    {
+                        query.getFetchPlan().addGroup(fetchParam);
+                    }
                     Object result = query.execute();
                     if (result instanceof Collection)
                     {
@@ -231,13 +239,17 @@ public class RestServlet extends HttpServlet
             }
             else if (token.equalsIgnoreCase("jpql"))
             {
-                // GET "/query?the_query_details" where "the_query_details" is SELECT FROM ... WHERE ... ORDER BY ...
+                // GET "/jpql?the_query_details" where "the_query_details" is "SELECT ... FROM ... WHERE ... ORDER BY ..."
                 String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
                     Query query = pm.newQuery("JPQL", queryString);
+                    if (fetchParam != null)
+                    {
+                        query.getFetchPlan().addGroup(fetchParam);
+                    }
                     Object result = query.execute();
                     if (result instanceof Collection)
                     {
@@ -302,6 +314,10 @@ public class RestServlet extends HttpServlet
                             queryString += " WHERE " + URLDecoder.decode(req.getQueryString(), "UTF-8");
                         }
                         PersistenceManager pm = pmf.getPersistenceManager();
+                        if (fetchParam != null)
+                        {
+                            pm.getFetchPlan().addGroup(fetchParam);
+                        }
                         try
                         {
                             pm.currentTransaction().begin();
@@ -358,6 +374,10 @@ public class RestServlet extends HttpServlet
                 {
                     // GET "/{candidateclass}/id" - Find object by id
                     PersistenceManager pm = pmf.getPersistenceManager();
+                    if (fetchParam != null)
+                    {
+                        pm.getFetchPlan().addGroup(fetchParam);
+                    }
                     try
                     {
                         pm.currentTransaction().begin();
