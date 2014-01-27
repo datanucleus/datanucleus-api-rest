@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>datanucleus-api-rest</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.3-SNAPSHOT</version>
 
     <name>DataNucleus API REST plugin</name>
     <description>
