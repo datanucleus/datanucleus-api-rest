@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
-import org.datanucleus.NucleusContext;
+import org.datanucleus.PersistenceNucleusContext;
 import org.datanucleus.api.jdo.JDOPersistenceManager;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.datanucleus.exceptions.ClassNotResolvedException;
@@ -68,7 +68,7 @@ public class RestServlet extends HttpServlet
     public static final NucleusLogger LOGGER_REST = NucleusLogger.getLoggerInstance("DataNucleus.REST");
 
     PersistenceManagerFactory pmf;
-    NucleusContext nucCtx;
+    PersistenceNucleusContext nucCtx;
 
     /* (non-Javadoc)
      * @see javax.servlet.GenericServlet#destroy()

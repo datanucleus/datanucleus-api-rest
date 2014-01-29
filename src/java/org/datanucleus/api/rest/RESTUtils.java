@@ -26,6 +26,7 @@ import java.util.Collection;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.NucleusContext;
+import org.datanucleus.PersistenceNucleusContext;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.identity.IdentityUtils;
@@ -212,7 +213,7 @@ public class RESTUtils
         return obj;
     }
 
-    public static Object getIdentityForURLToken(AbstractClassMetaData cmd, String token, NucleusContext nucCtx)
+    public static Object getIdentityForURLToken(AbstractClassMetaData cmd, String token, PersistenceNucleusContext nucCtx)
     {
         if (cmd.getIdentityType() == IdentityType.APPLICATION)
         {
