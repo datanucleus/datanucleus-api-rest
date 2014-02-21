@@ -355,7 +355,7 @@ public class RESTUtils
             }
             catch (SecurityException ex)
             {
-                ex.printStackTrace();
+                NucleusLogger.DATASTORE_RETRIEVE.warn("Exception in construction of object from JSON", ex);
             }
 
         }

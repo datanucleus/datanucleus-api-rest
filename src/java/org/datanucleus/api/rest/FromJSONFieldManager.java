@@ -24,6 +24,7 @@ import org.datanucleus.ExecutionContext;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
+import org.datanucleus.util.NucleusLogger;
 import org.datanucleus.util.TypeConversionHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -336,7 +337,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
         }
         catch (JSONException e)
         {
-            e.printStackTrace();
+            NucleusLogger.DATASTORE_RETRIEVE.warn("Exception in fetch of boolean field", e);
         }
         return false;
     }

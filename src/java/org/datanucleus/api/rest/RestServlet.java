@@ -360,7 +360,6 @@ public class RestServlet extends HttpServlet
                     }
                     catch (RuntimeException ex)
                     {
-                        ex.printStackTrace();
                         // errors from the google appengine may be raised when running queries
                         JSONObject error = new JSONObject();
                         error.put("exception", ex.getMessage());
