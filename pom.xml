@@ -11,7 +11,7 @@
     <artifactId>datanucleus-api-rest</artifactId>
     <version>4.0.0-m1-SNAPSHOT</version>
 
-    <name>DataNucleus API REST plugin</name>
+    <name>DataNucleus REST API plugin</name>
     <description>
         DataNucleus API RESTful HTTP Servlet plugin.
     </description>
