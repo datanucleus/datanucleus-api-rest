@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.datanucleus</groupId>
         <artifactId>datanucleus-maven-parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
     </parent>
 
     <artifactId>datanucleus-api-rest</artifactId>
@@ -18,8 +18,8 @@
 
     <properties>
         <jdo.version>3.0</jdo.version>
-        <dn.core.version>4.0.0-m1</dn.core.version>
-        <dn.api.jdo.version>4.0.0-m1</dn.api.jdo.version>
+        <dn.core.version>4.0.0-m2-SNAPSHOT</dn.core.version>
+        <dn.api.jdo.version>4.0.0-m2-SNAPSHOT</dn.api.jdo.version>
     </properties>
 
     <scm>
