@@ -15,12 +15,13 @@ limitations under the License.
 Contributors:
    ...
 **********************************************************************/
-package org.datanucleus.api.rest;
+package org.datanucleus.api.rest.fieldmanager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.datanucleus.ExecutionContext;
+import org.datanucleus.api.rest.RESTUtils;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
@@ -141,36 +142,6 @@ public class FromJSONFieldManager extends AbstractFieldManager
         }
     }
 
-    private List fetchJSONArray(JSONArray array,  int position) throws JSONException
-    {
-        List elements = new ArrayList();
-        for (int i=0; i<array.length(); i++)
-        {
-            if (array.isNull(i))
-            {
-                elements.add(null);
-            }
-            else
-            {
-                Object value = array.get(i);
-                
-                if (value instanceof JSONObject)
-                {
-                    elements.add(RESTUtils.getObjectFromJSONObject((JSONObject)value, ((JSONObject)value).getString("class"), ec));
-                }
-                else if (value instanceof JSONArray)
-                {
-                    elements.add(fetchJSONArray((JSONArray)value,position));
-                }
-                else
-                {
-                    elements.add(TypeConversionHelper.convertTo(value, cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getType()));
-                }
-            }
-        }
-        return elements;
-    }
-    
     public long fetchLongField(int position)
     {
         String fieldName = cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getName();
@@ -340,5 +311,35 @@ public class FromJSONFieldManager extends AbstractFieldManager
             NucleusLogger.DATASTORE_RETRIEVE.warn("Exception in fetch of boolean field", e);
         }
         return false;
+    }
+
+    private List fetchJSONArray(JSONArray array,  int position) throws JSONException
+    {
+        List elements = new ArrayList();
+        for (int i=0; i<array.length(); i++)
+        {
+            if (array.isNull(i))
+            {
+                elements.add(null);
+            }
+            else
+            {
+                Object value = array.get(i);
+                
+                if (value instanceof JSONObject)
+                {
+                    elements.add(RESTUtils.getObjectFromJSONObject((JSONObject)value, ((JSONObject)value).getString("class"), ec));
+                }
+                else if (value instanceof JSONArray)
+                {
+                    elements.add(fetchJSONArray((JSONArray)value,position));
+                }
+                else
+                {
+                    elements.add(TypeConversionHelper.convertTo(value, cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getType()));
+                }
+            }
+        }
+        return elements;
     }
 }

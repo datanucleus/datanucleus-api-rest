@@ -15,12 +15,13 @@ limitations under the License.
 Contributors:
    ...
 **********************************************************************/
-package org.datanucleus.api.rest;
+package org.datanucleus.api.rest.fieldmanager;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
 
 import org.datanucleus.ExecutionContext;
+import org.datanucleus.api.rest.RESTUtils;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
@@ -165,6 +166,7 @@ public class ToJSONFieldManager extends AbstractFieldManager
             return;
         }
 
+        // TODO Support embedded 1-1, 1-N
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
         RelationType relationType = mmd.getRelationType(ec.getClassLoaderResolver());
         if (RelationType.isRelationSingleValued(relationType))

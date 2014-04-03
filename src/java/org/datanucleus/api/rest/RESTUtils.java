@@ -29,6 +29,8 @@ import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.NucleusContext;
 import org.datanucleus.PersistenceNucleusContext;
+import org.datanucleus.api.rest.fieldmanager.FromJSONFieldManager;
+import org.datanucleus.api.rest.fieldmanager.ToJSONFieldManager;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.identity.IdentityUtils;
