@@ -53,6 +53,13 @@
             <version>[${jdo.version}, )</version>
             <scope>provided</scope>
         </dependency>
+        <!-- In case we swap out org.json internals for javax.json at some point -->
+        <!-- dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency-->
     </dependencies>
 
     <build>
