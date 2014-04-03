@@ -23,6 +23,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
 
+import javax.jdo.JDOFatalUserException;
+
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.NucleusContext;
@@ -117,12 +119,12 @@ public class RESTUtils
      * If it represents a POJO and the POJO is persistent then retrieves it and superimposes the JSONObject values.
      * If it represents a POJO and the POJO is not yet persistent then creates it with the JSONObject values.
      * Also allows some specific non-persistable object types.
+     * Throws {@link ClassNotResolvedException} when the class is not found.
+     * Throws {@link JDOFatalUserException} if other error occurred.
      * @param jsonobj JSONObject
      * @param className Name of the class
      * @param ec ExecutionContext
      * @return The Object being represented
-     * @throws ClassNotResolvedException when the class is not found
-     * @throws {@link JDOFatalUserException} If other error occurred
      */
     public static Object getObjectFromJSONObject(final JSONObject jsonobj, String className, ExecutionContext ec)
     {

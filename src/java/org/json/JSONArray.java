@@ -41,44 +41,6 @@ import java.util.Map;
  * <code>Boolean</code>, <code>JSONArray</code>, <code>JSONObject</code>,
  * <code>Number</code>, <code>String</code>, or the
  * <code>JSONObject.NULL object</code>.
- * <p>
- * The constructor can convert a JSON text into a Java object. The
- * <code>toString</code> method converts to JSON text.
- * <p>
- * A <code>get</code> method returns a value if one can be found, and throws an
- * exception if one cannot be found. An <code>opt</code> method returns a
- * default value instead of throwing an exception, and so is useful for
- * obtaining optional values.
- * <p>
- * The generic <code>get()</code> and <code>opt()</code> methods return an
- * object which you can cast or query for type. There are also typed
- * <code>get</code> and <code>opt</code> methods that do type checking and type
- * coercion for you.
- * <p>
- * The texts produced by the <code>toString</code> methods strictly conform to
- * JSON syntax rules. The constructors are more forgiving in the texts they will
- * accept:
- * <ul>
- * <li>An extra <code>,</code>&nbsp;<small>(comma)</small> may appear just
- *     before the closing bracket.</li>
- * <li>The <code>null</code> value will be inserted when there
- *     is <code>,</code>&nbsp;<small>(comma)</small> elision.</li>
- * <li>Strings may be quoted with <code>'</code>&nbsp;<small>(single
- *     quote)</small>.</li>
- * <li>Strings do not need to be quoted at all if they do not begin with a quote
- *     or single quote, and if they do not contain leading or trailing spaces,
- *     and if they do not contain any of these characters:
- *     <code>{ } [ ] / \ : , = ; #</code> and if they do not look like numbers
- *     and if they are not the reserved words <code>true</code>,
- *     <code>false</code>, or <code>null</code>.</li>
- * <li>Values can be separated by <code>;</code> <small>(semicolon)</small> as
- *     well as by <code>,</code> <small>(comma)</small>.</li>
- * <li>Numbers may have the <code>0-</code> <small>(octal)</small> or
- *     <code>0x-</code> <small>(hex)</small> prefix.</li>
- * </ul>
-
- * @author JSON.org
- * @version 2009-02-09
  */
 public class JSONArray {
 
@@ -168,13 +130,6 @@ public class JSONArray {
             new ArrayList(collection);
     }
 
-    /**
-     * Construct a JSONArray from a collection of beans.
-     * The collection should have Java Beans.
-     * 
-     * @throws JSONException If not an array.
-     */
-
     public JSONArray(Collection collection, boolean includeSuperClass) {
 		this.myArrayList = new ArrayList();
 		if (collection != null) {
@@ -190,11 +145,7 @@ public class JSONArray {
 		}
     }
 
-    
-    /**
-     * Construct a JSONArray from an array
-     * @throws JSONException If not an array.
-     */
+
     public JSONArray(Object array) throws JSONException {
         this();
         if (array.getClass().isArray()) {
@@ -207,12 +158,6 @@ public class JSONArray {
         }
     }
 
-    /**
-     * Construct a JSONArray from an array with a bean.
-     * The array should have Java Beans.
-     * 
-     * @throws JSONException If not an array.
-     */
     public JSONArray(Object array,boolean includeSuperClass) throws JSONException {
         this();
         if (array.getClass().isArray()) {
@@ -231,14 +176,6 @@ public class JSONArray {
     }
 
     
-    
-    /**
-     * Get the object value associated with an index.
-     * @param index
-     *  The index must be between 0 and length() - 1.
-     * @return An object value.
-     * @throws JSONException If there is no value for the index.
-     */
     public Object get(int index) throws JSONException {
         Object o = opt(index);
         if (o == null) {
@@ -869,7 +806,7 @@ public class JSONArray {
      *  representation of the object, beginning
      *  with <code>[</code>&nbsp;<small>(left bracket)</small> and ending
      *  with <code>]</code>&nbsp;<small>(right bracket)</small>.
-     * @throws JSONException
+     * @throws JSONException if error occurs
      */
     public String toString(int indentFactor) throws JSONException {
         return toString(indentFactor, 0);
@@ -884,7 +821,7 @@ public class JSONArray {
      * @param indent The indention of the top level.
      * @return a printable, displayable, transmittable
      *  representation of the array.
-     * @throws JSONException
+     * @throws JSONException if error occurs
      */
     String toString(int indentFactor, int indent) throws JSONException {
         int len = length();
@@ -918,16 +855,6 @@ public class JSONArray {
         return sb.toString();
     }
 
-
-    /**
-     * Write the contents of the JSONArray as JSON text to a writer.
-     * For compactness, no whitespace is added.
-     * <p>
-     * Warning: This method assumes that the data structure is acyclical.
-     *
-     * @return The writer.
-     * @throws JSONException
-     */
     public Writer write(Writer writer) throws JSONException {
         try {
             boolean b = false;

@@ -52,39 +52,6 @@ import java.util.TreeSet;
  * exception if one cannot be found. An <code>opt</code> method returns a
  * default value instead of throwing an exception, and so is useful for
  * obtaining optional values.
- * <p>
- * The generic <code>get()</code> and <code>opt()</code> methods return an
- * object, which you can cast or query for type. There are also typed
- * <code>get</code> and <code>opt</code> methods that do type checking and type
- * coercion for you.
- * <p>
- * The <code>put</code> methods adds values to an object. For example, <pre>
- *     myString = new JSONObject().put("JSON", "Hello, World!").toString();</pre>
- * produces the string <code>{"JSON": "Hello, World"}</code>.
- * <p>
- * The texts produced by the <code>toString</code> methods strictly conform to
- * the JSON syntax rules.
- * The constructors are more forgiving in the texts they will accept:
- * <ul>
- * <li>An extra <code>,</code>&nbsp;<small>(comma)</small> may appear just
- *     before the closing brace.</li>
- * <li>Strings may be quoted with <code>'</code>&nbsp;<small>(single
- *     quote)</small>.</li>
- * <li>Strings do not need to be quoted at all if they do not begin with a quote
- *     or single quote, and if they do not contain leading or trailing spaces,
- *     and if they do not contain any of these characters:
- *     <code>{ } [ ] / \ : , = ; #</code> and if they do not look like numbers
- *     and if they are not the reserved words <code>true</code>,
- *     <code>false</code>, or <code>null</code>.</li>
- * <li>Keys can be followed by <code>=</code> or <code>=></code> as well as
- *     by <code>:</code>.</li>
- * <li>Values can be followed by <code>;</code> <small>(semicolon)</small> as
- *     well as by <code>,</code> <small>(comma)</small>.</li>
- * <li>Numbers may have the <code>0-</code> <small>(octal)</small> or
- *     <code>0x-</code> <small>(hex)</small> prefix.</li>
- * </ul>
- * @author JSON.org
- * @version 2009-03-06
  */
 public class JSONObject {
 
@@ -239,9 +206,6 @@ public class JSONObject {
 
     /**
      * Construct a JSONObject from a Map.
-     *
-     * Note: Use this constructor when the map contains <key,bean>.
-     *
      * @param map - A map with Key-Bean data.
      * @param includeSuperClass - Tell whether to include the super class properties.
      */
@@ -634,7 +598,7 @@ public class JSONObject {
 
     /**
      * Get an array of field names from a JSONObject.
-     *
+     * @param jo JSON Object
      * @return An array of field names, or null if there are no names.
      */
     public static String[] getNames(JSONObject jo) {
@@ -655,7 +619,7 @@ public class JSONObject {
 
     /**
      * Get an array of field names from an Object.
-     *
+     * @param object JSON Object
      * @return An array of field names, or null if there are no names.
      */
     public static String[] getNames(Object object) {
@@ -820,7 +784,7 @@ public class JSONObject {
      * @param key   A key string.
      * @param value A Collection value.
      * @return      this.
-     * @throws JSONException
+     * @throws JSONException if an error occurs
      */
     public JSONObject put(String key, Collection value) throws JSONException {
         put(key, new JSONArray(value));
@@ -1046,7 +1010,7 @@ public class JSONObject {
      * @param key   A key string.
      * @param value A Map value.
      * @return      this.
-     * @throws JSONException
+     * @throws JSONException if an error occurs
      */
     public JSONObject put(String key, Map value) throws JSONException {
         put(key, new JSONObject(value));
@@ -1083,9 +1047,9 @@ public class JSONObject {
      * Put a key/value pair in the JSONObject, but only if the key and the
      * value are both non-null, and only if there is not already a member
      * with that name.
-     * @param key
-     * @param value
-     * @return his.
+     * @param key The key
+     * @param value The value
+     * @return this.
      * @throws JSONException if the key is a duplicate
      */
     public JSONObject putOnce(String key, Object value) throws JSONException {
@@ -1119,7 +1083,7 @@ public class JSONObject {
 
     /**
      * Produce a string in double quotes with backslash sequences in all the
-     * right places. A backslash will be inserted within </, allowing JSON
+     * right places. A backslash will be inserted within &lt;/, allowing JSON
      * text to be delivered in HTML. In JSON text, a string cannot contain a
      * control character or an unescaped quote or backslash.
      * @param string A String
@@ -1528,15 +1492,6 @@ public class JSONObject {
     }
 
 
-     /**
-      * Write the contents of the JSONObject as JSON text to a writer.
-      * For compactness, no whitespace is added.
-      * <p>
-      * Warning: This method assumes that the data structure is acyclical.
-      *
-      * @return The writer.
-      * @throws JSONException
-      */
      public Writer write(Writer writer) throws JSONException {
         try {
             boolean  b = false;
