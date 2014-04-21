@@ -20,12 +20,11 @@ package org.datanucleus.api.rest;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.spi.Detachable;
-import javax.jdo.spi.JDOImplHelper;
-import javax.jdo.spi.PersistenceCapable;
-import javax.jdo.spi.StateManager;
-
+import org.datanucleus.ExecutionContext;
+import org.datanucleus.enhancer.Detachable;
+import org.datanucleus.enhancer.EnhancementHelper;
+import org.datanucleus.enhancer.Persistable;
+import org.datanucleus.state.StateManager;
 import org.datanucleus.store.fieldmanager.FieldManager;
 
 /**
@@ -33,174 +32,174 @@ import org.datanucleus.store.fieldmanager.FieldManager;
  */
 public class DummyStateManager implements StateManager
 {
-    PersistenceCapable myPC;
+    Persistable myPC;
 
     FieldManager fm;
 
     public DummyStateManager(Class cls)
     {
-        myPC = JDOImplHelper.getInstance().newInstance(cls, this);
+        myPC = EnhancementHelper.getInstance().newInstance(cls, this);
     }
 
-    public boolean getBooleanField(PersistenceCapable arg0, int arg1, boolean arg2)
+    public boolean getBooleanField(Persistable arg0, int arg1, boolean arg2)
     {
         return false;
     }
 
-    public byte getByteField(PersistenceCapable arg0, int arg1, byte arg2)
+    public byte getByteField(Persistable arg0, int arg1, byte arg2)
     {
         return 0;
     }
 
-    public char getCharField(PersistenceCapable arg0, int arg1, char arg2)
+    public char getCharField(Persistable arg0, int arg1, char arg2)
     {
         return 0;
     }
 
-    public double getDoubleField(PersistenceCapable arg0, int arg1, double arg2)
+    public double getDoubleField(Persistable arg0, int arg1, double arg2)
     {
         return 0;
     }
 
-    public float getFloatField(PersistenceCapable arg0, int arg1, float arg2)
+    public float getFloatField(Persistable arg0, int arg1, float arg2)
     {
         return 0;
     }
 
-    public int getIntField(PersistenceCapable arg0, int arg1, int arg2)
+    public int getIntField(Persistable arg0, int arg1, int arg2)
     {
         return 0;
     }
 
-    public long getLongField(PersistenceCapable arg0, int arg1, long arg2)
+    public long getLongField(Persistable arg0, int arg1, long arg2)
     {
         return 0;
     }
 
-    public Object getObjectField(PersistenceCapable arg0, int arg1, Object arg2)
+    public Object getObjectField(Persistable arg0, int arg1, Object arg2)
     {
         return null;
     }
 
-    public Object getObjectId(PersistenceCapable arg0)
+    public Object getObjectId(Persistable arg0)
     {
         return null;
     }
 
-    public PersistenceManager getPersistenceManager(PersistenceCapable arg0)
+    public ExecutionContext getExecutionContext(Persistable arg0)
     {
         return null;
     }
 
-    public short getShortField(PersistenceCapable arg0, int arg1, short arg2)
+    public short getShortField(Persistable arg0, int arg1, short arg2)
     {
         return 0;
     }
 
-    public String getStringField(PersistenceCapable arg0, int arg1, String arg2)
+    public String getStringField(Persistable arg0, int arg1, String arg2)
     {
         return null;
     }
 
-    public Object getTransactionalObjectId(PersistenceCapable arg0)
+    public Object getTransactionalObjectId(Persistable arg0)
     {
         return null;
     }
 
-    public Object getVersion(PersistenceCapable arg0)
+    public Object getVersion(Persistable arg0)
     {
         return null;
     }
 
-    public boolean isDeleted(PersistenceCapable arg0)
+    public boolean isDeleted(Persistable arg0)
     {
         return false;
     }
 
-    public boolean isDirty(PersistenceCapable arg0)
+    public boolean isDirty(Persistable arg0)
     {
         return false;
     }
 
-    public boolean isLoaded(PersistenceCapable arg0, int arg1)
+    public boolean isLoaded(Persistable arg0, int arg1)
     {
         return false;
     }
 
-    public boolean isNew(PersistenceCapable arg0)
+    public boolean isNew(Persistable arg0)
     {
         return false;
     }
 
-    public boolean isPersistent(PersistenceCapable arg0)
+    public boolean isPersistent(Persistable arg0)
     {
         return false;
     }
 
-    public boolean isTransactional(PersistenceCapable arg0)
+    public boolean isTransactional(Persistable arg0)
     {
         return false;
     }
 
-    public void makeDirty(PersistenceCapable arg0, String arg1)
+    public void makeDirty(Persistable arg0, String arg1)
     {
     }
 
-    public void preSerialize(PersistenceCapable arg0)
+    public void preSerialize(Persistable arg0)
     {
     }
 
-    public void providedBooleanField(PersistenceCapable arg0, int arg1, boolean arg2)
+    public void providedBooleanField(Persistable arg0, int arg1, boolean arg2)
     {
     }
 
-    public void providedByteField(PersistenceCapable arg0, int arg1, byte arg2)
+    public void providedByteField(Persistable arg0, int arg1, byte arg2)
     {
     }
 
-    public void providedCharField(PersistenceCapable arg0, int arg1, char arg2)
+    public void providedCharField(Persistable arg0, int arg1, char arg2)
     {
     }
 
-    public void providedDoubleField(PersistenceCapable arg0, int arg1, double arg2)
+    public void providedDoubleField(Persistable arg0, int arg1, double arg2)
     {
     }
 
-    public void providedFloatField(PersistenceCapable arg0, int arg1, float arg2)
+    public void providedFloatField(Persistable arg0, int arg1, float arg2)
     {
     }
 
-    public void providedIntField(PersistenceCapable arg0, int arg1, int arg2)
+    public void providedIntField(Persistable arg0, int arg1, int arg2)
     {
     }
 
-    public void providedLongField(PersistenceCapable arg0, int arg1, long arg2)
+    public void providedLongField(Persistable arg0, int arg1, long arg2)
     {
     }
 
-    public void providedObjectField(PersistenceCapable arg0, int arg1, Object arg2)
+    public void providedObjectField(Persistable arg0, int arg1, Object arg2)
     {
     }
 
-    public void providedShortField(PersistenceCapable arg0, int arg1, short arg2)
+    public void providedShortField(Persistable arg0, int arg1, short arg2)
     {
     }
 
-    public void providedStringField(PersistenceCapable arg0, int arg1, String arg2)
+    public void providedStringField(Persistable arg0, int arg1, String arg2)
     {
     }
 
-    public boolean replacingBooleanField(PersistenceCapable arg0, int arg1)
+    public boolean replacingBooleanField(Persistable arg0, int arg1)
     {
         return fm.fetchBooleanField(arg1);
     }
 
-    public byte replacingByteField(PersistenceCapable arg0, int arg1)
+    public byte replacingByteField(Persistable arg0, int arg1)
     {
         return fm.fetchByteField(arg1);
     }
 
-    public char replacingCharField(PersistenceCapable arg0, int arg1)
+    public char replacingCharField(Persistable arg0, int arg1)
     {
         return fm.fetchCharField(arg1);
     }
@@ -210,95 +209,95 @@ public class DummyStateManager implements StateManager
         return null;
     }
 
-    public double replacingDoubleField(PersistenceCapable arg0, int arg1)
+    public double replacingDoubleField(Persistable arg0, int arg1)
     {
         return fm.fetchDoubleField(arg1);
     }
 
-    public byte replacingFlags(PersistenceCapable arg0)
+    public byte replacingFlags(Persistable arg0)
     {
         return 0;
     }
 
-    public float replacingFloatField(PersistenceCapable arg0, int arg1)
+    public float replacingFloatField(Persistable arg0, int arg1)
     {
         return fm.fetchFloatField(arg1);
     }
 
-    public int replacingIntField(PersistenceCapable arg0, int arg1)
+    public int replacingIntField(Persistable arg0, int arg1)
     {
         return fm.fetchIntField(arg1);
     }
 
-    public long replacingLongField(PersistenceCapable arg0, int arg1)
+    public long replacingLongField(Persistable arg0, int arg1)
     {
         return fm.fetchLongField(arg1);
     }
 
-    public Object replacingObjectField(PersistenceCapable arg0, int arg1)
+    public Object replacingObjectField(Persistable arg0, int arg1)
     {
         return fm.fetchObjectField(arg1);
     }
 
-    public short replacingShortField(PersistenceCapable arg0, int arg1)
+    public short replacingShortField(Persistable arg0, int arg1)
     {
         return fm.fetchShortField(arg1);
     }
 
-    public javax.jdo.spi.StateManager replacingStateManager(PersistenceCapable arg0, javax.jdo.spi.StateManager arg1)
+    public StateManager replacingStateManager(Persistable arg0, StateManager arg1)
     {
         return null;
     }
 
-    public String replacingStringField(PersistenceCapable arg0, int arg1)
+    public String replacingStringField(Persistable arg0, int arg1)
     {
         return fm.fetchStringField(arg1);
     }
 
-    public void setBooleanField(PersistenceCapable arg0, int arg1, boolean arg2, boolean arg3)
+    public void setBooleanField(Persistable arg0, int arg1, boolean arg2, boolean arg3)
     {
     }
 
-    public void setByteField(PersistenceCapable arg0, int arg1, byte arg2, byte arg3)
+    public void setByteField(Persistable arg0, int arg1, byte arg2, byte arg3)
     {
     }
 
-    public void setCharField(PersistenceCapable arg0, int arg1, char arg2, char arg3)
+    public void setCharField(Persistable arg0, int arg1, char arg2, char arg3)
     {
     }
 
-    public void setDoubleField(PersistenceCapable arg0, int arg1, double arg2, double arg3)
+    public void setDoubleField(Persistable arg0, int arg1, double arg2, double arg3)
     {
     }
 
-    public void setFloatField(PersistenceCapable arg0, int arg1, float arg2, float arg3)
+    public void setFloatField(Persistable arg0, int arg1, float arg2, float arg3)
     {
     }
 
-    public void setIntField(PersistenceCapable arg0, int arg1, int arg2, int arg3)
+    public void setIntField(Persistable arg0, int arg1, int arg2, int arg3)
     {
     }
 
-    public void setLongField(PersistenceCapable arg0, int arg1, long arg2, long arg3)
+    public void setLongField(Persistable arg0, int arg1, long arg2, long arg3)
     {
     }
 
-    public void setObjectField(PersistenceCapable arg0, int arg1, Object arg2, Object arg3)
+    public void setObjectField(Persistable arg0, int arg1, Object arg2, Object arg3)
     {
     }
 
-    public void setShortField(PersistenceCapable arg0, int arg1, short arg2, short arg3)
+    public void setShortField(Persistable arg0, int arg1, short arg2, short arg3)
     {
     }
 
-    public void setStringField(PersistenceCapable arg0, int arg1, String arg2, String arg3)
+    public void setStringField(Persistable arg0, int arg1, String arg2, String arg3)
     {
     }
 
     void replaceFields(int[] fieldNumbers, FieldManager fm)
     {
         this.fm = fm;
-        myPC.jdoReplaceFields(fieldNumbers);
+        myPC.dnReplaceFields(fieldNumbers);
     }
 
     public Object getObject()
@@ -310,12 +309,12 @@ public class DummyStateManager implements StateManager
     {
         try
         {
-            // Calls to pc.jdoReplaceStateManager must be run privileged
+            // Calls to pc.dnReplaceStateManager must be run privileged
             AccessController.doPrivileged(new PrivilegedAction()
             {
                 public Object run()
                 {
-                    myPC.jdoReplaceStateManager(null);
+                    myPC.dnReplaceStateManager(null);
                     return null;
                 }
             });
