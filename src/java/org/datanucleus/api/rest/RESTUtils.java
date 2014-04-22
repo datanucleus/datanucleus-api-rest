@@ -226,7 +226,7 @@ public class RESTUtils
                 ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
                 Object value = TypeConversionHelper.convertTo(token,
                     cmd.getMetaDataForManagedMemberAtAbsolutePosition(cmd.getPKMemberPositions()[0]).getType());
-                return nucCtx.getApiAdapter().getNewSingleFieldIdentity(clr.classForName(cmd.getObjectidClass()), 
+                return IdentityUtils.getNewSingleFieldIdentity(clr.classForName(cmd.getObjectidClass()), 
                     clr.classForName(cmd.getFullClassName()), value);
             }
             // TODO Composite PK?

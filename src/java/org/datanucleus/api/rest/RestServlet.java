@@ -44,6 +44,7 @@ import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.exceptions.NucleusUserException;
+import org.datanucleus.identity.IdentityUtils;
 import org.datanucleus.identity.OID;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
@@ -480,7 +481,7 @@ public class RestServlet extends HttpServlet
                     {
                         if (cmd.usesSingleFieldIdentityClass())
                         {
-                            jsonobj.put(cmd.getPrimaryKeyMemberNames()[0], ec.getApiAdapter().getTargetKeyForSingleFieldIdentity(id));
+                            jsonobj.put(cmd.getPrimaryKeyMemberNames()[0], IdentityUtils.getTargetKeyForSingleFieldIdentity(id));
                         }
                     }
                     else if (cmd.getIdentityType() == IdentityType.DATASTORE)
