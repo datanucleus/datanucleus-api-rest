@@ -34,7 +34,6 @@ import org.datanucleus.api.rest.fieldmanager.ToJSONFieldManager;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.identity.IdentityUtils;
-import org.datanucleus.identity.OID;
 import org.datanucleus.identity.OIDFactory;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
@@ -94,8 +93,8 @@ public class RESTUtils
             jsonobj.put("class", cmd.getFullClassName());
             if (cmd.getIdentityType() == IdentityType.DATASTORE)
             {
-                OID oid = (OID)ec.getApiAdapter().getIdForObject(obj);
-                jsonobj.put("_id", oid.getKeyValue());
+                Object id = ec.getApiAdapter().getIdForObject(obj);
+                jsonobj.put("_id", IdentityUtils.getTargetKeyForDatastoreIdentity(id));
             }
             if (ec.getApiAdapter().getVersionForObject(obj) != null)
             {

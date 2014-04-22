@@ -45,7 +45,6 @@ import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.identity.IdentityUtils;
-import org.datanucleus.identity.OID;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
 import org.datanucleus.util.NucleusLogger;
@@ -486,7 +485,7 @@ public class RestServlet extends HttpServlet
                     }
                     else if (cmd.getIdentityType() == IdentityType.DATASTORE)
                     {
-                        jsonobj.put("_id", ((OID)id).getKeyValue());
+                        jsonobj.put("_id", IdentityUtils.getTargetKeyForDatastoreIdentity(id));
                     }
                 }
             }
