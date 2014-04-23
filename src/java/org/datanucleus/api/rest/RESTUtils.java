@@ -34,7 +34,6 @@ import org.datanucleus.api.rest.fieldmanager.ToJSONFieldManager;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.identity.IdentityUtils;
-import org.datanucleus.identity.OIDFactory;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
 import org.datanucleus.metadata.MetaDataUtils;
@@ -170,12 +169,12 @@ public class RESTUtils
                 if (MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData()) == String.class)
                 {
                     String idVal = jsonobj.getString("_id");
-                    id = OIDFactory.getInstance(ec.getNucleusContext(), className, idVal);
+                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, idVal);
                 }
                 else
                 {
                     long idVal = jsonobj.getLong("_id");
-                    id = OIDFactory.getInstance(ec.getNucleusContext(), className, idVal);
+                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, idVal);
                 }
             }
             catch (JSONException e)
@@ -225,8 +224,7 @@ public class RESTUtils
                 ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
                 Object value = TypeConversionHelper.convertTo(token,
                     cmd.getMetaDataForManagedMemberAtAbsolutePosition(cmd.getPKMemberPositions()[0]).getType());
-                return IdentityUtils.getNewSingleFieldIdentity(clr.classForName(cmd.getObjectidClass()), 
-                    clr.classForName(cmd.getFullClassName()), value);
+                return nucCtx.getIdentityManager().getSingleFieldId(clr.classForName(cmd.getObjectidClass()), clr.classForName(cmd.getFullClassName()), value);
             }
             // TODO Composite PK?
         }
@@ -234,7 +232,7 @@ public class RESTUtils
         {
             Class type = MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData());
             Object value = TypeConversionHelper.convertTo(token, type);
-            return OIDFactory.getInstance(nucCtx, cmd.getFullClassName(), value);
+            return nucCtx.getIdentityManager().getDatastoreId(cmd.getFullClassName(), value);
         }
         return null;
     }
