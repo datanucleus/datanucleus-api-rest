@@ -22,13 +22,13 @@ import java.util.Collection;
 
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.api.rest.RESTUtils;
+import org.datanucleus.api.rest.orgjson.JSONArray;
+import org.datanucleus.api.rest.orgjson.JSONException;
+import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * FieldManager to allow population of a JSONObject with values from fields of a persistable object.

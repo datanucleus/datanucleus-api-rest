@@ -31,6 +31,9 @@ import org.datanucleus.NucleusContext;
 import org.datanucleus.PersistenceNucleusContext;
 import org.datanucleus.api.rest.fieldmanager.FromJSONFieldManager;
 import org.datanucleus.api.rest.fieldmanager.ToJSONFieldManager;
+import org.datanucleus.api.rest.orgjson.JSONArray;
+import org.datanucleus.api.rest.orgjson.JSONException;
+import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.identity.IdentityUtils;
@@ -42,9 +45,6 @@ import org.datanucleus.store.fieldmanager.FieldManager;
 import org.datanucleus.util.ClassUtils;
 import org.datanucleus.util.NucleusLogger;
 import org.datanucleus.util.TypeConversionHelper;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Series of convenience methods for manipulating JSONObject objects.

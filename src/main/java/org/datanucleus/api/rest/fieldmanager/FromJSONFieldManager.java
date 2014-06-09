@@ -22,14 +22,14 @@ import java.util.List;
 
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.api.rest.RESTUtils;
+import org.datanucleus.api.rest.orgjson.JSONArray;
+import org.datanucleus.api.rest.orgjson.JSONException;
+import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.util.NucleusLogger;
 import org.datanucleus.util.TypeConversionHelper;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * FieldManager responsible for accessing the values from a JSONObject, and putting into a POJO.
