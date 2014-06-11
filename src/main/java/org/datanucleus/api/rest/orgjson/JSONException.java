@@ -5,7 +5,9 @@ package org.datanucleus.api.rest.orgjson;
  * @author JSON.org
  * @version 2008-09-18
  */
-public class JSONException extends Exception {
+public class JSONException extends Exception 
+{
+    private static final long serialVersionUID = -4384519715189169541L;
     private Throwable cause;
 
     /**

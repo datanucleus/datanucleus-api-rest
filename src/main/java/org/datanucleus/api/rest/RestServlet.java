@@ -65,6 +65,8 @@ import org.datanucleus.util.NucleusLogger;
  */
 public class RestServlet extends HttpServlet
 {
+    private static final long serialVersionUID = -4445182084242929362L;
+
     public static final NucleusLogger LOGGER_REST = NucleusLogger.getLoggerInstance("DataNucleus.REST");
 
     PersistenceManagerFactory pmf;
