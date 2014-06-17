@@ -371,48 +371,46 @@ public class RestServlet extends HttpServlet
                         return;
                     }
                 }
-                else
+
+                // GET "/{candidateclass}/id" - Find object by id
+                PersistenceManager pm = pmf.getPersistenceManager();
+                if (fetchParam != null)
                 {
-                    // GET "/{candidateclass}/id" - Find object by id
-                    PersistenceManager pm = pmf.getPersistenceManager();
-                    if (fetchParam != null)
+                    pm.getFetchPlan().addGroup(fetchParam);
+                }
+                try
+                {
+                    pm.currentTransaction().begin();
+                    Object result = pm.getObjectById(id);
+                    JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
+                        ((JDOPersistenceManager)pm).getExecutionContext());
+                    resp.getWriter().write(jsonobj.toString());
+                    resp.setHeader("Content-Type","application/json");
+                    pm.currentTransaction().commit();
+                    return;
+                }
+                catch (NucleusObjectNotFoundException ex)
+                {
+                    resp.setContentLength(0);
+                    resp.setStatus(404);
+                    return;
+                }
+                catch (NucleusException ex)
+                {
+                    JSONObject error = new JSONObject();
+                    error.put("exception", ex.getMessage());
+                    resp.getWriter().write(error.toString());
+                    resp.setStatus(404);
+                    resp.setHeader("Content-Type", "application/json");
+                    return;
+                }
+                finally
+                {
+                    if (pm.currentTransaction().isActive())
                     {
-                        pm.getFetchPlan().addGroup(fetchParam);
+                        pm.currentTransaction().rollback();
                     }
-                    try
-                    {
-                        pm.currentTransaction().begin();
-                        Object result = pm.getObjectById(id);
-                        JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
-                            ((JDOPersistenceManager)pm).getExecutionContext());
-                        resp.getWriter().write(jsonobj.toString());
-                        resp.setHeader("Content-Type","application/json");
-                        pm.currentTransaction().commit();
-                        return;
-                    }
-                    catch (NucleusObjectNotFoundException ex)
-                    {
-                        resp.setContentLength(0);
-                        resp.setStatus(404);
-                        return;
-                    }
-                    catch (NucleusException ex)
-                    {
-                        JSONObject error = new JSONObject();
-                        error.put("exception", ex.getMessage());
-                        resp.getWriter().write(error.toString());
-                        resp.setStatus(404);
-                        resp.setHeader("Content-Type", "application/json");
-                        return;
-                    }
-                    finally
-                    {
-                        if (pm.currentTransaction().isActive())
-                        {
-                            pm.currentTransaction().rollback();
-                        }
-                        pm.close();
-                    }
+                    pm.close();
                 }
             }
         }

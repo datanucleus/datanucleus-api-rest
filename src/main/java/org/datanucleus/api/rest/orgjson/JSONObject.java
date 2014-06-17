@@ -1213,18 +1213,13 @@ public class JSONObject
                 {
                     return Double.valueOf(s);
                 }
-                else
+
+                Long myLong = Long.valueOf(s);
+                if (myLong.longValue() == myLong.intValue())
                 {
-                    Long myLong = Long.valueOf(s);
-                    if (myLong.longValue() == myLong.intValue())
-                    {
-                        return Integer.valueOf(myLong.intValue());
-                    }
-                    else
-                    {
-                        return myLong;
-                    }
+                    return Integer.valueOf(myLong.intValue());
                 }
+                return myLong;
             }
             catch (Exception f)
             {
