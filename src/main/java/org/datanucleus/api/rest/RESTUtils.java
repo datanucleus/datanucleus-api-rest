@@ -196,6 +196,7 @@ public class RESTUtils
             catch (NucleusException ne)
             {
                 // Not yet persistent so needs a transient object
+                // TODO Remove DummyStateManager and find better way
                 final FieldManager fm = new FromJSONFieldManager(jsonobj, cmd, ec);
                 DummyStateManager dummySM = new DummyStateManager(cls);
                 int[] fieldNumbers = cmd.getAllMemberPositions();
@@ -206,6 +207,7 @@ public class RESTUtils
             }
         }
 
+        // TODO Remove DummyStateManager and find better way
         final FieldManager fm = new FromJSONFieldManager(jsonobj, cmd, ec);
         DummyStateManager dummySM = new DummyStateManager(cls);
         int[] fieldNumbers = cmd.getAllMemberPositions();
