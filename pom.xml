@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>datanucleus-api-rest</artifactId>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.1.0-m1-SNAPSHOT</version>
 
     <name>DataNucleus REST API plugin</name>
     <description>
@@ -18,8 +18,8 @@
 
     <properties>
         <jdo.version>3.0</jdo.version>
-        <dn.core.version>4.0.4</dn.core.version>
-        <dn.api.jdo.version>4.0.4</dn.api.jdo.version>
+        <dn.core.version>4.1.0-m1-SNAPSHOT</dn.core.version>
+        <dn.api.jdo.version>4.1.0-m1-SNAPSHOT</dn.api.jdo.version>
     </properties>
 
     <scm>
