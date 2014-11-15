@@ -20,8 +20,8 @@ package org.datanucleus.api.rest;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.datanucleus.ExecutionContext;
 import org.datanucleus.enhancement.Detachable;
+import org.datanucleus.enhancement.ExecutionContextReference;
 import org.datanucleus.enhancement.Persistable;
 import org.datanucleus.enhancement.StateManager;
 import org.datanucleus.enhancer.EnhancementHelper;
@@ -86,7 +86,7 @@ public class DummyStateManager implements StateManager
         return null;
     }
 
-    public ExecutionContext getExecutionContext(Persistable arg0)
+    public ExecutionContextReference getExecutionContext(Persistable arg0)
     {
         return null;
     }
