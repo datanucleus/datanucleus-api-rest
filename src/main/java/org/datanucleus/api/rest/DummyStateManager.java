@@ -21,10 +21,10 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.datanucleus.ExecutionContext;
-import org.datanucleus.enhancer.Detachable;
+import org.datanucleus.enhancement.Detachable;
+import org.datanucleus.enhancement.Persistable;
+import org.datanucleus.enhancement.StateManager;
 import org.datanucleus.enhancer.EnhancementHelper;
-import org.datanucleus.enhancer.Persistable;
-import org.datanucleus.state.StateManager;
 import org.datanucleus.store.fieldmanager.FieldManager;
 
 /**
