@@ -215,14 +215,12 @@ public class RestServlet extends HttpServlet
                     Object result = query.execute();
                     if (result instanceof Collection)
                     {
-                        JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, 
-                            ((JDOPersistenceManager)pm).getExecutionContext());
+                        JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, ((JDOPersistenceManager)pm).getExecutionContext());
                         resp.getWriter().write(jsonobj.toString());
                     }
                     else
                     {
-                        JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
-                            ((JDOPersistenceManager)pm).getExecutionContext());
+                        JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
                         resp.getWriter().write(jsonobj.toString());
                     }
                     resp.setHeader("Content-Type", "application/json");
@@ -255,14 +253,12 @@ public class RestServlet extends HttpServlet
                     Object result = query.execute();
                     if (result instanceof Collection)
                     {
-                        JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, 
-                            ((JDOPersistenceManager)pm).getExecutionContext());
+                        JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, ((JDOPersistenceManager)pm).getExecutionContext());
                         resp.getWriter().write(jsonobj.toString());
                     }
                     else
                     {
-                        JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
-                            ((JDOPersistenceManager)pm).getExecutionContext());
+                        JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
                         resp.getWriter().write(jsonobj.toString());
                     }
                     resp.setHeader("Content-Type", "application/json");
@@ -325,8 +321,7 @@ public class RestServlet extends HttpServlet
                             pm.currentTransaction().begin();
                             Query query = pm.newQuery("JDOQL", queryString);
                             List result = (List)query.execute();
-                            JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection(result, 
-                                ((JDOPersistenceManager)pm).getExecutionContext());
+                            JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection(result, ((JDOPersistenceManager)pm).getExecutionContext());
                             resp.getWriter().write(jsonobj.toString());
                             resp.setHeader("Content-Type", "application/json");
                             resp.setStatus(200);
@@ -382,8 +377,9 @@ public class RestServlet extends HttpServlet
                 {
                     pm.currentTransaction().begin();
                     Object result = pm.getObjectById(id);
-                    JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
-                        ((JDOPersistenceManager)pm).getExecutionContext());
+                    pm.retrieve(result); // Make sure all fields in FetchPlan are loaded before converting to JSON
+
+                    JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
                     resp.getWriter().write(jsonobj.toString());
                     resp.setHeader("Content-Type","application/json");
                     pm.currentTransaction().commit();
