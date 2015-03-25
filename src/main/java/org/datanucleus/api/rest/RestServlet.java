@@ -382,6 +382,8 @@ public class RestServlet extends HttpServlet
                 {
                     pm.currentTransaction().begin();
                     Object result = pm.getObjectById(id);
+                    pm.retrieve(result); // Make sure all fields in FetchPlan are loaded before converting to JSON
+
                     JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, 
                         ((JDOPersistenceManager)pm).getExecutionContext());
                     resp.getWriter().write(jsonobj.toString());
