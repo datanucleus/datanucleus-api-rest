@@ -58,18 +58,6 @@ public class ToJSONFieldManager extends AbstractFieldManager
         }
     }
 
-    public void storeCharField(int fieldNumber, char value)
-    {
-        AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-        try
-        {
-            jsonobj.put(mmd.getName(), value);
-        }
-        catch (JSONException e)
-        {
-        }
-    }
-
     public void storeByteField(int fieldNumber, byte value)
     {
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
@@ -82,7 +70,31 @@ public class ToJSONFieldManager extends AbstractFieldManager
         }
     }
 
-    public void storeShortField(int fieldNumber, short value)
+    public void storeCharField(int fieldNumber, char value)
+    {
+        AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+        try
+        {
+            jsonobj.put(mmd.getName(), value);
+        }
+        catch (JSONException e)
+        {
+        }
+    }
+
+    public void storeDoubleField(int fieldNumber, double value)
+    {
+        AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+        try
+        {
+            jsonobj.put(mmd.getName(), value);
+        }
+        catch (JSONException e)
+        {
+        }
+    }
+
+    public void storeFloatField(int fieldNumber, float value)
     {
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
         try
@@ -118,19 +130,7 @@ public class ToJSONFieldManager extends AbstractFieldManager
         }
     }
 
-    public void storeFloatField(int fieldNumber, float value)
-    {
-        AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-        try
-        {
-            jsonobj.put(mmd.getName(), value);
-        }
-        catch (JSONException e)
-        {
-        }
-    }
-
-    public void storeDoubleField(int fieldNumber, double value)
+    public void storeShortField(int fieldNumber, short value)
     {
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
         try
@@ -220,10 +220,21 @@ public class ToJSONFieldManager extends AbstractFieldManager
                 {
                 }
             }
-            // TODO Support maps
+            else if (mmd.hasMap())
+            {
+                // TODO Support maps
+            }
         }
         else
         {
+            if (mmd.hasCollection())
+            {
+                // TODO Array of non-persistables
+            }
+            else if (mmd.hasArray())
+            {
+                // TODO Array of non-persistables
+            }
             try
             {
                 jsonobj.put(mmd.getName(), value);
