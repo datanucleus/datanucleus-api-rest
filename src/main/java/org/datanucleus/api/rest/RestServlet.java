@@ -192,8 +192,18 @@ public class RestServlet extends HttpServlet
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
     {
-        // Retrieve any fetch group that needs applying to the fetch
-        String fetchParam = req.getParameter("fetch");
+        // Retrieve any fetch group specification that need applying to the fetch
+        String fetchGroup = req.getParameter("fetchGroup");
+        if (fetchGroup == null)
+        {
+            fetchGroup = req.getParameter("fetch");
+        }
+        String maxFetchDepthStr = req.getParameter("maxFetchDepth");
+        Integer maxFetchDepth = null;
+        if (maxFetchDepthStr != null)
+        {
+            maxFetchDepth = Integer.valueOf(maxFetchDepthStr);
+        }
 
         try
         {
@@ -201,16 +211,20 @@ public class RestServlet extends HttpServlet
             if (token.equalsIgnoreCase("query") || token.equalsIgnoreCase("jdoql"))
             {
                 // GET "/query?the_query_details" or GET "/jdoql?the_query_details" where "the_query_details" is "SELECT FROM ... WHERE ... ORDER BY ..."
-                String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
 
+                    String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                     Query query = pm.newQuery("JDOQL", queryString);
-                    if (fetchParam != null)
+                    if (fetchGroup != null)
                     {
-                        query.getFetchPlan().addGroup(fetchParam);
+                        query.getFetchPlan().addGroup(fetchGroup);
+                    }
+                    if (maxFetchDepth != null)
+                    {
+                        query.getFetchPlan().setMaxFetchDepth(maxFetchDepth);
                     }
                     Object result = query.execute();
                     if (result instanceof Collection)
@@ -225,6 +239,7 @@ public class RestServlet extends HttpServlet
                     }
                     resp.setHeader("Content-Type", "application/json");
                     resp.setStatus(200);
+
                     pm.currentTransaction().commit();
                 }
                 finally
@@ -245,10 +260,15 @@ public class RestServlet extends HttpServlet
                 try
                 {
                     pm.currentTransaction().begin();
+
                     Query query = pm.newQuery("JPQL", queryString);
-                    if (fetchParam != null)
+                    if (fetchGroup != null)
                     {
-                        query.getFetchPlan().addGroup(fetchParam);
+                        query.getFetchPlan().addGroup(fetchGroup);
+                    }
+                    if (maxFetchDepth != null)
+                    {
+                        query.getFetchPlan().setMaxFetchDepth(maxFetchDepth);
                     }
                     Object result = query.execute();
                     if (result instanceof Collection)
@@ -263,6 +283,7 @@ public class RestServlet extends HttpServlet
                     }
                     resp.setHeader("Content-Type", "application/json");
                     resp.setStatus(200);
+
                     pm.currentTransaction().commit();
                 }
                 finally
@@ -304,27 +325,34 @@ public class RestServlet extends HttpServlet
                     // Find objects by type or by query
                     try
                     {
-                        // get the whole extent for this candidate
-                        String queryString = "SELECT FROM " + cmd.getFullClassName();
-                        if (req.getQueryString() != null)
-                        {
-                            // query by filter for this candidate
-                            queryString += " WHERE " + URLDecoder.decode(req.getQueryString(), "UTF-8");
-                        }
                         PersistenceManager pm = pmf.getPersistenceManager();
-                        if (fetchParam != null)
+                        if (fetchGroup != null)
                         {
-                            pm.getFetchPlan().addGroup(fetchParam);
+                            pm.getFetchPlan().addGroup(fetchGroup);
                         }
+                        if (maxFetchDepth != null)
+                        {
+                            pm.getFetchPlan().setMaxFetchDepth(maxFetchDepth);
+                        }
+
                         try
                         {
                             pm.currentTransaction().begin();
+
+                            // get the whole extent for this candidate
+                            String queryString = "SELECT FROM " + cmd.getFullClassName();
+                            if (req.getQueryString() != null)
+                            {
+                                // query by filter for this candidate
+                                queryString += " WHERE " + URLDecoder.decode(req.getQueryString(), "UTF-8");
+                            }
                             Query query = pm.newQuery("JDOQL", queryString);
                             List result = (List)query.execute();
                             JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection(result, ((JDOPersistenceManager)pm).getExecutionContext());
                             resp.getWriter().write(jsonobj.toString());
                             resp.setHeader("Content-Type", "application/json");
                             resp.setStatus(200);
+
                             pm.currentTransaction().commit();
                         }
                         finally
@@ -369,10 +397,15 @@ public class RestServlet extends HttpServlet
 
                 // GET "/{candidateclass}/id" - Find object by id
                 PersistenceManager pm = pmf.getPersistenceManager();
-                if (fetchParam != null)
+                if (fetchGroup != null)
                 {
-                    pm.getFetchPlan().addGroup(fetchParam);
+                    pm.getFetchPlan().addGroup(fetchGroup);
                 }
+                if (maxFetchDepth != null)
+                {
+                    pm.getFetchPlan().setMaxFetchDepth(maxFetchDepth);
+                }
+
                 try
                 {
                     pm.currentTransaction().begin();
