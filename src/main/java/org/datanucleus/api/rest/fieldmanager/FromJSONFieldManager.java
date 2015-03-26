@@ -339,6 +339,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         " is a collection field so should have been provided with JSONArray, but is " + StringUtils.toJVMIDString(value));
                 }
                 JSONArray array = (JSONArray)value;
+                NucleusLogger.GENERAL.info(">> FromJSON mmd=" + mmd.getFullFieldName() + " json=" + array);
                 Collection<Object> coll;
                 try
                 {
@@ -351,6 +352,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                 }
 
                 AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr, ec.getMetaDataManager());
+                Class elemCls = clr.classForName(mmd.getCollection().getElementType());
                 for (int i=0; i<array.length(); i++)
                 {
                     if (array.isNull(i))
@@ -374,7 +376,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         }
                         else
                         {
-                            coll.add(TypeConversionHelper.convertTo(elemValue, mmd.getType()));
+                            coll.add(TypeConversionHelper.convertTo(elemValue, elemCls));
                         }
                     }
                 }
@@ -396,6 +398,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                 Object arr = Array.newInstance(mmd.getType().getComponentType(), array.length());
 
                 AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr, ec.getMetaDataManager());
+                Class elemCls = clr.classForName(mmd.getCollection().getElementType());
                 for (int i=0; i<array.length(); i++)
                 {
                     if (array.isNull(i))
@@ -419,7 +422,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         }
                         else
                         {
-                            Array.set(arr, i, TypeConversionHelper.convertTo(elemValue, mmd.getType()));
+                            Array.set(arr, i, TypeConversionHelper.convertTo(elemValue, elemCls));
                         }
                     }
                 }
@@ -452,6 +455,8 @@ public class FromJSONFieldManager extends AbstractFieldManager
 
                 AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
                 AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
+                Class keyCls = clr.classForName(mmd.getMap().getKeyType());
+                Class valCls = clr.classForName(mmd.getMap().getValueType());
                 Iterator keyIter = jsonobj.keys();
                 while (keyIter.hasNext())
                 {
@@ -470,7 +475,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     }
                     else
                     {
-                        key = jsonKey;
+                        key = TypeConversionHelper.convertTo(jsonKey, keyCls);
                     }
 
                     Object jsonVal = jsonobj.get((String)jsonKey);
@@ -488,7 +493,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     }
                     else
                     {
-                        val = jsonKey;
+                        val = TypeConversionHelper.convertTo(jsonVal, valCls);
                     }
 
                     map.put(key, val);
