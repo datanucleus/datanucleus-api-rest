@@ -308,8 +308,10 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
 
             Object value = jsonobj.get(mmd.getName());
-            if (RelationType.isRelationSingleValued(mmd.getRelationType(ec.getClassLoaderResolver())))
+            ClassLoaderResolver clr = ec.getClassLoaderResolver();
+            if (RelationType.isRelationSingleValued(mmd.getRelationType(clr)))
             {
+                // 1-1/N-1
                 if (!(value instanceof JSONObject))
                 {
                     throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
@@ -331,6 +333,11 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasCollection())
             {
+                if (!(value instanceof JSONArray))
+                {
+                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
+                        " is a collection field so should have been provided with JSONArray, but is " + StringUtils.toJVMIDString(value));
+                }
                 JSONArray array = (JSONArray)value;
                 Collection<Object> coll;
                 try
@@ -343,6 +350,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     throw new NucleusDataStoreException("Exception creating container for field " + mmd.getFullFieldName(), e);
                 }
 
+                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr, ec.getMetaDataManager());
                 for (int i=0; i<array.length(); i++)
                 {
                     if (array.isNull(i))
@@ -353,7 +361,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     else
                     {
                         Object elemValue = array.get(i);
-                        if (elemValue instanceof JSONObject)
+                        if (elemCmd != null)
                         {
                             JSONObject jsonobj = (JSONObject)elemValue;
                             String elemType = mmd.getCollection().getElementType();
@@ -379,9 +387,15 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasArray())
             {
+                if (!(value instanceof JSONArray))
+                {
+                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
+                        " is an array field so should have been provided with JSONArray, but is " + StringUtils.toJVMIDString(value));
+                }
                 JSONArray array = (JSONArray)value;
                 Object arr = Array.newInstance(mmd.getType().getComponentType(), array.length());
 
+                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr, ec.getMetaDataManager());
                 for (int i=0; i<array.length(); i++)
                 {
                     if (array.isNull(i))
@@ -392,7 +406,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     else
                     {
                         Object elemValue = array.get(i);
-                        if (elemValue instanceof JSONObject)
+                        if (elemCmd != null)
                         {
                             JSONObject jsonobj = (JSONObject)elemValue;
                             String elemType = mmd.getArray().getElementType();
@@ -418,6 +432,11 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasMap())
             {
+                if (!(value instanceof JSONArray))
+                {
+                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
+                        " is a map field so should have been provided with JSONObject, but is " + StringUtils.toJVMIDString(value));
+                }
                 JSONObject jsonobj = (JSONObject)value;
 
                 Map map;
@@ -431,10 +450,8 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     throw new NucleusDataStoreException(e.getMessage(), e);
                 }
 
-                ClassLoaderResolver clr = ec.getClassLoaderResolver();
                 AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
                 AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
-
                 Iterator keyIter = jsonobj.keys();
                 while (keyIter.hasNext())
                 {
@@ -499,7 +516,8 @@ public class FromJSONFieldManager extends AbstractFieldManager
                 {
                     op.makeDirty(position);
                 }
-                return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
+                Class cls = clr.classForName(fieldType, true);
+                return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, cls, ec.getNucleusContext());
             }
 
             if (op != null)

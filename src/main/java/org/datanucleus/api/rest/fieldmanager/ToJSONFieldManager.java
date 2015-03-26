@@ -255,6 +255,7 @@ public class ToJSONFieldManager extends AbstractFieldManager
             }
             else
             {
+                // TODO There is no equivalent of RESTUtils.getNonPersistableObjectFromJSONObject so what if one of those types defined there?!
                 jsonobj.put(mmd.getName(), value);
             }
         }

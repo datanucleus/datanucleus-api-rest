@@ -233,7 +233,7 @@ public class RESTUtils
 
     /**
      * Deserialise from JSON to an object. Used for non-persistable classes.
-     * TODO Remove this and make it pluggable so people can provide handlers for their own types
+     * TODO Remove this and make it pluggable so people can provide handlers for their own types. We need a way of going to JSON from one of these types too!
      * @param jsonobj JSONObject
      * @param cls The class
      * @param nucCtx NucleusContext
