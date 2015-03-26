@@ -339,7 +339,6 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         " is a collection field so should have been provided with JSONArray, but is " + StringUtils.toJVMIDString(value));
                 }
                 JSONArray array = (JSONArray)value;
-                NucleusLogger.GENERAL.info(">> FromJSON mmd=" + mmd.getFullFieldName() + " json=" + array);
                 Collection<Object> coll;
                 try
                 {
@@ -435,7 +434,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasMap())
             {
-                if (!(value instanceof JSONArray))
+                if (!(value instanceof JSONObject))
                 {
                     throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
                         " is a map field so should have been provided with JSONObject, but is " + StringUtils.toJVMIDString(value));
@@ -497,13 +496,13 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     }
 
                     map.put(key, val);
-
-                    if (op != null)
-                    {
-                        op.makeDirty(position);
-                    }
-                    return map;
                 }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
+                return map;
             }
 
             if (value instanceof JSONObject)
