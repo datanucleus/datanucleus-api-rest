@@ -92,13 +92,11 @@ public class RESTUtils
             jsonobj.put("class", cmd.getFullClassName());
             if (cmd.getIdentityType() == IdentityType.DATASTORE)
             {
-                Object id = ec.getApiAdapter().getIdForObject(obj);
-                jsonobj.put("_id", IdentityUtils.getTargetKeyForDatastoreIdentity(id));
+                jsonobj.put("_id", IdentityUtils.getTargetKeyForDatastoreIdentity(ec.getApiAdapter().getIdForObject(obj)));
             }
             if (ec.getApiAdapter().getVersionForObject(obj) != null)
             {
-                Object ver = ec.getApiAdapter().getVersionForObject(obj);
-                jsonobj.put("_version", ver);
+                jsonobj.put("_version", ec.getApiAdapter().getVersionForObject(obj));
             }
         }
         catch (JSONException e)
@@ -107,9 +105,8 @@ public class RESTUtils
 
         // Copy all FetchPlan fields into the object
         ObjectProvider op = ec.findObjectProvider(obj);
-        int[] fpMembers = ec.getFetchPlan().getFetchPlanForClass(cmd).getMemberNumbers();
         FieldManager fm = new ToJSONFieldManager(jsonobj, cmd, ec);
-        op.provideFields(fpMembers, fm);
+        op.provideFields(ec.getFetchPlan().getFetchPlanForClass(cmd).getMemberNumbers(), fm);
 
         return jsonobj;
     }
@@ -168,13 +165,11 @@ public class RESTUtils
             {
                 if (MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData()) == String.class)
                 {
-                    String idVal = jsonobj.getString("_id");
-                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, idVal);
+                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, jsonobj.getString("_id"));
                 }
                 else
                 {
-                    long idVal = jsonobj.getLong("_id");
-                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, idVal);
+                    id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, jsonobj.getLong("_id"));
                 }
             }
             catch (JSONException e)
@@ -199,22 +194,20 @@ public class RESTUtils
                 // TODO Remove DummyStateManager and find better way
                 final FieldManager fm = new FromJSONFieldManager(jsonobj, cmd, ec);
                 DummyStateManager dummySM = new DummyStateManager(cls);
-                int[] fieldNumbers = cmd.getAllMemberPositions();
-                dummySM.replaceFields(fieldNumbers, fm);
-                Object obj = dummySM.getObject();
+                dummySM.replaceFields(cmd.getAllMemberPositions(), fm);
+                Object pc = dummySM.getObject();
                 dummySM.disconnect();
-                return obj;
+                return pc;
             }
         }
 
         // TODO Remove DummyStateManager and find better way
         final FieldManager fm = new FromJSONFieldManager(jsonobj, cmd, ec);
         DummyStateManager dummySM = new DummyStateManager(cls);
-        int[] fieldNumbers = cmd.getAllMemberPositions();
-        dummySM.replaceFields(fieldNumbers, fm);
-        Object obj = dummySM.getObject();
+        dummySM.replaceFields(cmd.getAllMemberPositions(), fm);
+        Object pc = dummySM.getObject();
         dummySM.disconnect();
-        return obj;
+        return pc;
     }
 
     public static Object getIdentityForURLToken(AbstractClassMetaData cmd, String token, PersistenceNucleusContext nucCtx)
@@ -224,8 +217,7 @@ public class RESTUtils
             if (cmd.usesSingleFieldIdentityClass())
             {
                 ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
-                Object value = TypeConversionHelper.convertTo(token,
-                    cmd.getMetaDataForManagedMemberAtAbsolutePosition(cmd.getPKMemberPositions()[0]).getType());
+                Object value = TypeConversionHelper.convertTo(token, cmd.getMetaDataForManagedMemberAtAbsolutePosition(cmd.getPKMemberPositions()[0]).getType());
                 return nucCtx.getIdentityManager().getSingleFieldId(clr.classForName(cmd.getObjectidClass()), clr.classForName(cmd.getFullClassName()), value);
             }
             // TODO Composite PK?
@@ -241,13 +233,13 @@ public class RESTUtils
 
     /**
      * Deserialise from JSON to an object. Used for non-persistable classes.
+     * TODO Remove this and make it pluggable so people can provide handlers for their own types
      * @param jsonobj JSONObject
      * @param cls The class
      * @param nucCtx NucleusContext
      * @return The object of the specified class
      */
-    public static Object getNonPersistableObjectFromJSONObject(final JSONObject jsonobj, final Class cls,
-            NucleusContext nucCtx)
+    public static Object getNonPersistableObjectFromJSONObject(final JSONObject jsonobj, final Class cls, NucleusContext nucCtx)
     {
         ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
         if (cls.getName().equals("com.google.appengine.api.users.User"))
@@ -281,8 +273,7 @@ public class RESTUtils
                 {
                     //if it's a JSONObject
                     JSONObject parentobj = jsonobj.getJSONObject("parent");
-                    parent = RESTUtils.getNonPersistableObjectFromJSONObject(parentobj, 
-                        clr.classForName(jsonobj.getString("class")), nucCtx);
+                    parent = RESTUtils.getNonPersistableObjectFromJSONObject(parentobj, clr.classForName(jsonobj.getString("class")), nucCtx);
                 }
                 if (jsonobj.has("appId"))
                 {
@@ -291,12 +282,10 @@ public class RESTUtils
                     Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
                     if (parent != null)
                     {
-                        return ClassUtils.getMethodForClass(keyFactory, "createKey",
-                            new Class[]{cls, String.class,String.class}).invoke(null, new Object[]{parent, kind, appId});
+                        return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls, String.class,String.class}).invoke(null, new Object[]{parent, kind, appId});
                     }
 
-                    return ClassUtils.getMethodForClass(keyFactory, "createKey",
-                        new Class[]{String.class,String.class}).invoke(null, new Object[]{kind, appId});
+                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,String.class}).invoke(null, new Object[]{kind, appId});
                 }
 
                 long id = jsonobj.getLong("id");
@@ -304,12 +293,10 @@ public class RESTUtils
                 Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
                 if (parent != null)
                 {
-                    return ClassUtils.getMethodForClass(keyFactory, "createKey",
-                        new Class[]{cls,String.class,long.class}).invoke(null, new Object[]{parent,kind,Long.valueOf(id)});
+                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls,String.class,long.class}).invoke(null, new Object[]{parent,kind,Long.valueOf(id)});
                 }
 
-                return ClassUtils.getMethodForClass(keyFactory, "createKey",
-                    new Class[]{String.class,long.class}).invoke(null, new Object[]{kind,Long.valueOf(id)});
+                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,long.class}).invoke(null, new Object[]{kind,Long.valueOf(id)});
             }
             catch (Exception e)
             {

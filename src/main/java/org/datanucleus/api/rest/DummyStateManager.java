@@ -41,6 +41,101 @@ public class DummyStateManager implements StateManager
         myPC = EnhancementHelper.getInstance().newInstance(cls, this);
     }
 
+    public boolean replacingBooleanField(Persistable arg0, int arg1)
+    {
+        return fm.fetchBooleanField(arg1);
+    }
+
+    public byte replacingByteField(Persistable arg0, int arg1)
+    {
+        return fm.fetchByteField(arg1);
+    }
+
+    public char replacingCharField(Persistable arg0, int arg1)
+    {
+        return fm.fetchCharField(arg1);
+    }
+
+    public double replacingDoubleField(Persistable arg0, int arg1)
+    {
+        return fm.fetchDoubleField(arg1);
+    }
+
+    public float replacingFloatField(Persistable arg0, int arg1)
+    {
+        return fm.fetchFloatField(arg1);
+    }
+
+    public int replacingIntField(Persistable arg0, int arg1)
+    {
+        return fm.fetchIntField(arg1);
+    }
+
+    public long replacingLongField(Persistable arg0, int arg1)
+    {
+        return fm.fetchLongField(arg1);
+    }
+
+    public Object replacingObjectField(Persistable arg0, int arg1)
+    {
+        return fm.fetchObjectField(arg1);
+    }
+
+    public short replacingShortField(Persistable arg0, int arg1)
+    {
+        return fm.fetchShortField(arg1);
+    }
+
+    public String replacingStringField(Persistable arg0, int arg1)
+    {
+        return fm.fetchStringField(arg1);
+    }
+
+    void replaceFields(int[] fieldNumbers, FieldManager fm)
+    {
+        this.fm = fm;
+        myPC.dnReplaceFields(fieldNumbers);
+    }
+
+    public Object getObject()
+    {
+        return myPC;
+    }
+
+    public void disconnect()
+    {
+        try
+        {
+            // Calls to pc.dnReplaceStateManager must be run privileged
+            AccessController.doPrivileged(new PrivilegedAction()
+            {
+                public Object run()
+                {
+                    myPC.dnReplaceStateManager(null);
+                    return null;
+                }
+            });
+        }
+        catch (SecurityException e)
+        {
+        }
+    }
+
+    public Object[] replacingDetachedState(Detachable arg0, Object[] arg1)
+    {
+        return null;
+    }
+
+    public byte replacingFlags(Persistable arg0)
+    {
+        return 0;
+    }
+
+    public StateManager replacingStateManager(Persistable arg0, StateManager arg1)
+    {
+        return null;
+    }
+
     public boolean getBooleanField(Persistable arg0, int arg1, boolean arg2)
     {
         return false;
@@ -189,71 +284,6 @@ public class DummyStateManager implements StateManager
     {
     }
 
-    public boolean replacingBooleanField(Persistable arg0, int arg1)
-    {
-        return fm.fetchBooleanField(arg1);
-    }
-
-    public byte replacingByteField(Persistable arg0, int arg1)
-    {
-        return fm.fetchByteField(arg1);
-    }
-
-    public char replacingCharField(Persistable arg0, int arg1)
-    {
-        return fm.fetchCharField(arg1);
-    }
-
-    public Object[] replacingDetachedState(Detachable arg0, Object[] arg1)
-    {
-        return null;
-    }
-
-    public double replacingDoubleField(Persistable arg0, int arg1)
-    {
-        return fm.fetchDoubleField(arg1);
-    }
-
-    public byte replacingFlags(Persistable arg0)
-    {
-        return 0;
-    }
-
-    public float replacingFloatField(Persistable arg0, int arg1)
-    {
-        return fm.fetchFloatField(arg1);
-    }
-
-    public int replacingIntField(Persistable arg0, int arg1)
-    {
-        return fm.fetchIntField(arg1);
-    }
-
-    public long replacingLongField(Persistable arg0, int arg1)
-    {
-        return fm.fetchLongField(arg1);
-    }
-
-    public Object replacingObjectField(Persistable arg0, int arg1)
-    {
-        return fm.fetchObjectField(arg1);
-    }
-
-    public short replacingShortField(Persistable arg0, int arg1)
-    {
-        return fm.fetchShortField(arg1);
-    }
-
-    public StateManager replacingStateManager(Persistable arg0, StateManager arg1)
-    {
-        return null;
-    }
-
-    public String replacingStringField(Persistable arg0, int arg1)
-    {
-        return fm.fetchStringField(arg1);
-    }
-
     public void setBooleanField(Persistable arg0, int arg1, boolean arg2, boolean arg3)
     {
     }
@@ -292,35 +322,5 @@ public class DummyStateManager implements StateManager
 
     public void setStringField(Persistable arg0, int arg1, String arg2, String arg3)
     {
-    }
-
-    void replaceFields(int[] fieldNumbers, FieldManager fm)
-    {
-        this.fm = fm;
-        myPC.dnReplaceFields(fieldNumbers);
-    }
-
-    public Object getObject()
-    {
-        return myPC;
-    }
-
-    public void disconnect()
-    {
-        try
-        {
-            // Calls to pc.dnReplaceStateManager must be run privileged
-            AccessController.doPrivileged(new PrivilegedAction()
-            {
-                public Object run()
-                {
-                    myPC.dnReplaceStateManager(null);
-                    return null;
-                }
-            });
-        }
-        catch (SecurityException e)
-        {
-        }
     }
 }

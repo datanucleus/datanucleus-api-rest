@@ -297,15 +297,14 @@ public class FromJSONFieldManager extends AbstractFieldManager
         {
             if (jsonobj.isNull(mmd.getName()))
             {
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
                 return null;
             }
 
             Object value = jsonobj.get(mmd.getName());
-            if (op != null)
-            {
-                op.makeDirty(position);
-            }
-
             if (mmd.hasCollection())
             {
                 JSONArray array = (JSONArray)value;
@@ -347,6 +346,11 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         }
                     }
                 }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
                 return coll;
             }
             else if (mmd.hasArray())
@@ -381,6 +385,11 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         }
                     }
                 }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
                 return arr;
             }
             else if (mmd.hasMap())
@@ -403,6 +412,11 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     // Default type overridden by user
                     fieldType = jsonobj.getString("class");
                 }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
                 return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
             }
 
@@ -416,7 +430,17 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     // Default type overridden by user
                     fieldType = jsonobj.getString("class");
                 }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
                 return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
+            }
+
+            if (op != null)
+            {
+                op.makeDirty(position);
             }
             return TypeConversionHelper.convertTo(value, cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getType());
         }

@@ -519,8 +519,13 @@ public class RestServlet extends HttpServlet
                 }
             }
 
+            // Convert to an object from JSON
             Object pc = RESTUtils.getObjectFromJSONObject(jsonobj, className, ec);
+
+            // Persist
             Object obj = pm.makePersistent(pc);
+
+            // Return as JSON
             JSONObject jsonobj2 = RESTUtils.getJSONObjectFromPOJO(obj, ec);
             resp.getWriter().write(jsonobj2.toString());
             resp.setHeader("Content-Type", "application/json");
