@@ -19,7 +19,10 @@ package org.datanucleus.api.rest.fieldmanager;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.api.rest.RESTUtils;
 import org.datanucleus.api.rest.orgjson.JSONArray;
@@ -305,7 +308,28 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
 
             Object value = jsonobj.get(mmd.getName());
-            if (mmd.hasCollection())
+            if (RelationType.isRelationSingleValued(mmd.getRelationType(ec.getClassLoaderResolver())))
+            {
+                if (!(value instanceof JSONObject))
+                {
+                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
+                        " is a persistable field so should have been provided with JSONObject, but is " + StringUtils.toJVMIDString(value));
+                }
+                JSONObject jsonobj = (JSONObject)value;
+                String fieldType = mmd.getTypeName();
+                if (jsonobj.has("class"))
+                {
+                    // Default type overridden by user
+                    fieldType = jsonobj.getString("class");
+                }
+
+                if (op != null)
+                {
+                    op.makeDirty(position);
+                }
+                return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
+            }
+            else if (mmd.hasCollection())
             {
                 JSONArray array = (JSONArray)value;
                 Collection<Object> coll;
@@ -394,30 +418,70 @@ public class FromJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasMap())
             {
-                // TODO Implement support for Maps
-                throw new NucleusException("Dont currently support persist of Map field at " + mmd.getFullFieldName());
-            }
-
-            if (RelationType.isRelationSingleValued(mmd.getRelationType(ec.getClassLoaderResolver())))
-            {
-                if (!(value instanceof JSONObject))
-                {
-                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
-                        " is a persistable field so should have been provided with JSONObject, but is " + StringUtils.toJVMIDString(value));
-                }
                 JSONObject jsonobj = (JSONObject)value;
-                String fieldType = mmd.getTypeName();
-                if (jsonobj.has("class"))
+
+                Map map;
+                try
                 {
-                    // Default type overridden by user
-                    fieldType = jsonobj.getString("class");
+                    Class instanceType = SCOUtils.getContainerInstanceType(mmd.getType(), false);
+                    map = (Map) instanceType.newInstance();
+                }
+                catch (Exception e)
+                {
+                    throw new NucleusDataStoreException(e.getMessage(), e);
                 }
 
-                if (op != null)
+                ClassLoaderResolver clr = ec.getClassLoaderResolver();
+                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
+
+                Iterator keyIter = jsonobj.keys();
+                while (keyIter.hasNext())
                 {
-                    op.makeDirty(position);
+                    Object jsonKey = keyIter.next();
+                    Object key = null;
+                    if (keyCmd != null)
+                    {
+                        JSONObject keyObj = (JSONObject)jsonKey;
+                        String keyType = mmd.getMap().getKeyType();
+                        if (jsonobj.has("class"))
+                        {
+                            // Default type overridden by user
+                            keyType = jsonobj.getString("class");
+                        }
+                        key = RESTUtils.getObjectFromJSONObject(keyObj, keyType, ec);
+                    }
+                    else
+                    {
+                        key = jsonKey;
+                    }
+
+                    Object jsonVal = jsonobj.get((String)jsonKey);
+                    Object val = null;
+                    if (valCmd != null)
+                    {
+                        JSONObject valObj = (JSONObject)jsonVal;
+                        String valType = mmd.getMap().getValueType();
+                        if (jsonobj.has("class"))
+                        {
+                            // Default type overridden by user
+                            valType = jsonobj.getString("class");
+                        }
+                        val = RESTUtils.getObjectFromJSONObject(valObj, valType, ec);
+                    }
+                    else
+                    {
+                        val = jsonKey;
+                    }
+
+                    map.put(key, val);
+
+                    if (op != null)
+                    {
+                        op.makeDirty(position);
+                    }
+                    return map;
                 }
-                return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
             }
 
             if (value instanceof JSONObject)
@@ -447,7 +511,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
         catch (JSONException ex)
         {
             NucleusLogger.GENERAL.error("Exception thrown processing field " + mmd.getFullFieldName(), ex);
-            throw new NucleusException("Exception thrown during persist", ex);
+            throw new NucleusException("Exception thrown processing field " + mmd.getFullFieldName(), ex);
         }
     }
 }

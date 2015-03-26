@@ -19,12 +19,17 @@ package org.datanucleus.api.rest.fieldmanager;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.ExecutionContext;
 import org.datanucleus.api.rest.RESTUtils;
 import org.datanucleus.api.rest.orgjson.JSONArray;
 import org.datanucleus.api.rest.orgjson.JSONException;
 import org.datanucleus.api.rest.orgjson.JSONObject;
+import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
@@ -167,81 +172,95 @@ public class ToJSONFieldManager extends AbstractFieldManager
         }
 
         // TODO Support embedded 1-1, 1-N
+        ClassLoaderResolver clr = ec.getClassLoaderResolver();
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-        RelationType relationType = mmd.getRelationType(ec.getClassLoaderResolver());
-        if (RelationType.isRelationSingleValued(relationType))
+        RelationType relationType = mmd.getRelationType(clr);
+        try
         {
-            // 1-1/N-1
-            // TODO Prevent recursion
-            JSONObject obj = RESTUtils.getJSONObjectFromPOJO(value, ec);
-            try
+            if (RelationType.isRelationSingleValued(relationType))
             {
+                // 1-1/N-1 TODO Prevent recursion
+                JSONObject obj = RESTUtils.getJSONObjectFromPOJO(value, ec);
                 jsonobj.put(mmd.getName(), obj);
             }
-            catch (JSONException e)
+            else if (mmd.hasCollection())
             {
-            }
-        }
-        else if (RelationType.isRelationMultiValued(relationType))
-        {
-            // 1-N/M-N
-            // TODO Prevent recursion
-            if (mmd.hasCollection())
-            {
+                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr, ec.getMetaDataManager());
                 JSONArray arr = new JSONArray();
                 Collection collVal = (Collection)value;
-                try
+                int i = 0;
+                for (Object elem : collVal)
                 {
-                    int i = 0;
-                    for (Object elem : collVal)
+                    if (elemCmd != null)
                     {
-                        JSONObject obj = RESTUtils.getJSONObjectFromPOJO(elem, ec);
-                        arr.put(i++, obj);
+                        arr.put(i++, RESTUtils.getJSONObjectFromPOJO(elem, ec)); // TODO Prevent recursion
                     }
-                    jsonobj.put(mmd.getName(), arr);
+                    else
+                    {
+                        arr.put(i++, elem);
+                    }
                 }
-                catch (JSONException e)
-                {
-                }
+                jsonobj.put(mmd.getName(), arr);
             }
             else if (mmd.hasArray())
             {
+                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr, ec.getMetaDataManager());
                 JSONArray arr = new JSONArray();
-                try
+                for (int i=0;i<Array.getLength(value);i++)
                 {
-                    for (int i=0;i<Array.getLength(value);i++)
+                    Object elem = Array.get(value, i);
+                    if (elemCmd != null)
                     {
-                        JSONObject obj = RESTUtils.getJSONObjectFromPOJO(Array.get(value, i), ec);
-                        arr.put(i++, obj);
+                        arr.put(i++, RESTUtils.getJSONObjectFromPOJO(elem, ec)); // TODO Prevent recursion
                     }
-                    jsonobj.put(mmd.getName(), arr);
+                    else
+                    {
+                        arr.put(i++, elem);
+                    }
                 }
-                catch (JSONException e)
-                {
-                }
+                jsonobj.put(mmd.getName(), arr);
             }
             else if (mmd.hasMap())
             {
-                // TODO Support maps
+                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
+                Map jsonMap = new HashMap();
+                Iterator<Map.Entry> mapIter = ((Map)value).entrySet().iterator();
+                while (mapIter.hasNext())
+                {
+                    Map.Entry entry = mapIter.next();
+                    Object key = null;
+                    Object val = null;
+                    if (keyCmd != null)
+                    {
+                        key = RESTUtils.getJSONObjectFromPOJO(entry.getKey(), ec); // TODO Prevent recursion
+                    }
+                    else
+                    {
+                        key = entry.getKey();
+                    }
+
+                    if (valCmd != null)
+                    {
+                        val = RESTUtils.getJSONObjectFromPOJO(entry.getValue(), ec); // TODO Prevent recursion
+                    }
+                    else
+                    {
+                        val = entry.getValue();
+                    }
+
+                    jsonMap.put(key, val);
+                }
+                jsonobj.put(mmd.getName(), jsonMap);
             }
-        }
-        else
-        {
-            if (mmd.hasCollection())
-            {
-                // TODO Array of non-persistables
-            }
-            else if (mmd.hasArray())
-            {
-                // TODO Array of non-persistables
-            }
-            try
+            else
             {
                 jsonobj.put(mmd.getName(), value);
             }
-            catch (JSONException e)
-            {
-            }
+        }
+        catch (JSONException jsone)
+        {
+            throw new NucleusException("Exception converting value of field " + mmd.getFullFieldName() + " to JSON", jsone);
         }
     }
 }
