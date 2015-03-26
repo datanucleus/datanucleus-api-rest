@@ -27,6 +27,7 @@ import org.datanucleus.api.rest.orgjson.JSONException;
 import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
+import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
@@ -34,6 +35,7 @@ import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.SCOUtils;
 import org.datanucleus.util.NucleusLogger;
+import org.datanucleus.util.StringUtils;
 import org.datanucleus.util.TypeConversionHelper;
 
 /**
@@ -330,7 +332,14 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         Object elemValue = array.get(i);
                         if (elemValue instanceof JSONObject)
                         {
-                            coll.add(RESTUtils.getObjectFromJSONObject((JSONObject)elemValue, mmd.getCollection().getElementType(), ec));
+                            JSONObject jsonobj = (JSONObject)elemValue;
+                            String elemType = mmd.getCollection().getElementType();
+                            if (jsonobj.has("class"))
+                            {
+                                // Default type overridden by user
+                                elemType = jsonobj.getString("class");
+                            }
+                            coll.add(RESTUtils.getObjectFromJSONObject((JSONObject)elemValue, elemType, ec));
                         }
                         else
                         {
@@ -343,8 +352,6 @@ public class FromJSONFieldManager extends AbstractFieldManager
             else if (mmd.hasArray())
             {
                 JSONArray array = (JSONArray)value;
-                String elementType = mmd.getArray().getElementType();
-
                 Object arr = Array.newInstance(mmd.getType().getComponentType(), array.length());
 
                 for (int i=0; i<array.length(); i++)
@@ -359,7 +366,14 @@ public class FromJSONFieldManager extends AbstractFieldManager
                         Object elemValue = array.get(i);
                         if (elemValue instanceof JSONObject)
                         {
-                            Array.set(arr, i, RESTUtils.getObjectFromJSONObject((JSONObject)elemValue, elementType, ec));
+                            JSONObject jsonobj = (JSONObject)elemValue;
+                            String elemType = mmd.getArray().getElementType();
+                            if (jsonobj.has("class"))
+                            {
+                                // Default type overridden by user
+                                elemType = jsonobj.getString("class");
+                            }
+                            Array.set(arr, i, RESTUtils.getObjectFromJSONObject((JSONObject)elemValue, elemType, ec));
                         }
                         else
                         {
@@ -377,22 +391,31 @@ public class FromJSONFieldManager extends AbstractFieldManager
 
             if (RelationType.isRelationSingleValued(mmd.getRelationType(ec.getClassLoaderResolver())))
             {
-                return RESTUtils.getObjectFromJSONObject((JSONObject)value, mmd.getTypeName(), ec);
-            }
-
-            String fieldType = mmd.getTypeName();
-            try
-            {
-                // Use "class" if provided
-                fieldType = ((JSONObject)value).getString("class");
-            }
-            catch (JSONException jsone)
-            {
-                NucleusLogger.GENERAL.info("Persistent field " + mmd.getFullFieldName() + " has indeterminate type. Specify 'class' JSON attribute to workaround this");
+                if (!(value instanceof JSONObject))
+                {
+                    throw new NucleusUserException("Field " + mmd.getFullFieldName() + 
+                        " is a persistable field so should have been provided with JSONObject, but is " + StringUtils.toJVMIDString(value));
+                }
+                JSONObject jsonobj = (JSONObject)value;
+                String fieldType = mmd.getTypeName();
+                if (jsonobj.has("class"))
+                {
+                    // Default type overridden by user
+                    fieldType = jsonobj.getString("class");
+                }
+                return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
             }
 
             if (value instanceof JSONObject)
             {
+                // TODO This is not a persistable field, so why do we have JSONObject?
+                JSONObject jsonobj = (JSONObject)value;
+                String fieldType = mmd.getTypeName();
+                if (jsonobj.has("class"))
+                {
+                    // Default type overridden by user
+                    fieldType = jsonobj.getString("class");
+                }
                 return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
             }
             return TypeConversionHelper.convertTo(value, cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getType());
