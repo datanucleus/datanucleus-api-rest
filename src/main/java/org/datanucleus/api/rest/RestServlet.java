@@ -19,11 +19,13 @@ Contributors:
 package org.datanucleus.api.rest;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.zip.GZIPOutputStream;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -56,7 +58,7 @@ import org.datanucleus.util.NucleusLogger;
  * This servlet exposes persistent class via RESTful HTTP requests.
  * Supports the following
  * <ul>
- * <li>GET (retrieve/query)</li>
+ * <li>GET (retrieve/query), supporting GZIP compression on the response</li>
  * <li>POST (update/insert)</li>
  * <li>PUT (update/insert)</li>
  * <li>DELETE (delete)</li>
@@ -108,87 +110,6 @@ public class RestServlet extends HttpServlet
         super.init(config);
     }
 
-    /**
-     * Convenience method to get the next token after a "/".
-     * @param req The request
-     * @return The next token
-     */
-    private String getNextTokenAfterSlash(HttpServletRequest req)
-    {
-        String path = req.getRequestURI().substring(req.getContextPath().length() + req.getServletPath().length());
-        StringTokenizer tokenizer = new StringTokenizer(path, "/");
-        return tokenizer.nextToken();
-    }
-
-    /**
-     * Convenience accessor to get the id, following a "/".
-     * @param req The request
-     * @return The id (or null if no slash)
-     */
-    private Object getId(HttpServletRequest req)
-    {
-        ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
-        String path = req.getRequestURI().substring(req.getContextPath().length() + req.getServletPath().length());
-        StringTokenizer tokenizer = new StringTokenizer(path, "/");
-        String className = tokenizer.nextToken();
-        AbstractClassMetaData cmd = nucCtx.getMetaDataManager().getMetaDataForClass(className, clr);
-
-        String id = null;
-        if (tokenizer.hasMoreTokens())
-        {
-            // "id" single-field specified in URL
-            id = tokenizer.nextToken();
-            if (id == null || cmd == null)
-            {
-                return null;
-            }
-
-            Object identity = RESTUtils.getIdentityForURLToken(cmd, id, nucCtx);
-            if (identity != null)
-            {
-                return identity;
-            }
-        }
-
-        // "id" must have been specified in the content of the request
-        try
-        {
-            if (id == null && req.getContentLength() > 0)
-            {
-                char[] buffer = new char[req.getContentLength()];
-                req.getReader().read(buffer);
-                id = new String(buffer);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
-        if (id == null || cmd == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            // assume it's a JSONObject
-            id = URLDecoder.decode(id, "UTF-8");
-            JSONObject jsonobj = new JSONObject(id);
-            return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, clr.classForName(cmd.getObjectidClass()), nucCtx);
-        }
-        catch (JSONException ex)
-        {
-            // not JSON syntax
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            LOGGER_REST.error("Exception caught when trying to determine id", e);
-        }
-
-        return id;
-    }
-
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
     {
@@ -204,6 +125,7 @@ public class RestServlet extends HttpServlet
         {
             maxFetchDepth = Integer.valueOf(maxFetchDepthStr);
         }
+        boolean compress = requestAllowsGZIPCompression(req);
 
         try
         {
@@ -230,12 +152,12 @@ public class RestServlet extends HttpServlet
                     if (result instanceof Collection)
                     {
                         JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, ((JDOPersistenceManager)pm).getExecutionContext());
-                        resp.getWriter().write(jsonobj.toString());
+                        writeResponse(resp, jsonobj.toString(), compress);
                     }
                     else
                     {
                         JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
-                        resp.getWriter().write(jsonobj.toString());
+                        writeResponse(resp, jsonobj.toString(), compress);
                     }
                     resp.setHeader("Content-Type", "application/json");
                     resp.setStatus(200);
@@ -255,12 +177,12 @@ public class RestServlet extends HttpServlet
             else if (token.equalsIgnoreCase("jpql"))
             {
                 // GET "/jpql?the_query_details" where "the_query_details" is "SELECT ... FROM ... WHERE ... ORDER BY ..."
-                String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
 
+                    String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
                     Query query = pm.newQuery("JPQL", queryString);
                     if (fetchGroup != null)
                     {
@@ -274,12 +196,12 @@ public class RestServlet extends HttpServlet
                     if (result instanceof Collection)
                     {
                         JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection((Collection)result, ((JDOPersistenceManager)pm).getExecutionContext());
-                        resp.getWriter().write(jsonobj.toString());
+                        writeResponse(resp, jsonobj.toString(), compress);
                     }
                     else
                     {
                         JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
-                        resp.getWriter().write(jsonobj.toString());
+                        writeResponse(resp, jsonobj.toString(), compress);
                     }
                     resp.setHeader("Content-Type", "application/json");
                     resp.setStatus(200);
@@ -349,7 +271,7 @@ public class RestServlet extends HttpServlet
                             Query query = pm.newQuery("JDOQL", queryString);
                             List result = (List)query.execute();
                             JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection(result, ((JDOPersistenceManager)pm).getExecutionContext());
-                            resp.getWriter().write(jsonobj.toString());
+                            writeResponse(resp, jsonobj.toString(), compress);
                             resp.setHeader("Content-Type", "application/json");
                             resp.setStatus(200);
 
@@ -413,7 +335,7 @@ public class RestServlet extends HttpServlet
                     pm.retrieve(result); // Make sure all fields in FetchPlan are loaded before converting to JSON
 
                     JSONObject jsonobj = RESTUtils.getJSONObjectFromPOJO(result, ((JDOPersistenceManager)pm).getExecutionContext());
-                    resp.getWriter().write(jsonobj.toString());
+                    writeResponse(resp, jsonobj.toString(), compress);
                     resp.setHeader("Content-Type","application/json");
                     pm.currentTransaction().commit();
                     return;
@@ -806,5 +728,123 @@ public class RestServlet extends HttpServlet
             }
             pm.close();
         }
+    }
+
+    /**
+     * Convenience accessor to get the persistable id, following a "/" or in the content of the request.
+     * @param req The request
+     * @return The id (or null if not available)
+     */
+    private Object getId(HttpServletRequest req)
+    {
+        ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
+        String path = req.getRequestURI().substring(req.getContextPath().length() + req.getServletPath().length());
+        StringTokenizer tokenizer = new StringTokenizer(path, "/");
+        String className = tokenizer.nextToken();
+        AbstractClassMetaData cmd = nucCtx.getMetaDataManager().getMetaDataForClass(className, clr);
+
+        String id = null;
+        if (tokenizer.hasMoreTokens())
+        {
+            // "id" single-field specified in URL
+            id = tokenizer.nextToken();
+            if (id == null || cmd == null)
+            {
+                return null;
+            }
+
+            Object identity = RESTUtils.getIdentityForURLToken(cmd, id, nucCtx);
+            if (identity != null)
+            {
+                return identity;
+            }
+        }
+
+        // "id" must have been specified in the content of the request
+        try
+        {
+            if (id == null && req.getContentLength() > 0)
+            {
+                char[] buffer = new char[req.getContentLength()];
+                req.getReader().read(buffer);
+                id = new String(buffer);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        if (id == null || cmd == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            // assume it's a JSONObject
+            id = URLDecoder.decode(id, "UTF-8");
+            JSONObject jsonobj = new JSONObject(id);
+            return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, clr.classForName(cmd.getObjectidClass()), nucCtx);
+        }
+        catch (JSONException ex)
+        {
+            // not JSON syntax
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOGGER_REST.error("Exception caught when trying to determine id", e);
+        }
+
+        return id;
+    }
+
+    /**
+     * Accessor for whether the servlet request allows (GZIP) compression.
+     * @param req The request
+     * @return Whether we can do GZIP compression
+     */
+    private boolean requestAllowsGZIPCompression(HttpServletRequest req)
+    {
+        String encodings = req.getHeader("Accept-Encoding");
+        return ((encodings != null) && (encodings.indexOf("gzip") > -1));
+    }
+
+    /**
+     * Method to write the response, using (GZIP) compression if available.
+     * @param resp The response
+     * @param s The message to write
+     * @param useCompression Whether to use compression
+     * @throws IOException If an error occurs
+     */
+    private void writeResponse(HttpServletResponse resp, String s, boolean useCompression) throws IOException
+    {
+        if (useCompression && s.length() > 3000)
+        {
+            resp.setHeader("Content-Encoding", "gzip");
+            OutputStream o = resp.getOutputStream();
+            GZIPOutputStream gz = new GZIPOutputStream(o);
+            gz.write(s.getBytes());
+            gz.flush();
+            gz.close();
+            o.close();
+        }
+        else
+        {
+            // Just write normally
+            resp.getWriter().write(s);
+        }
+    }
+
+    /**
+     * Convenience method to get the next token after a "/".
+     * @param req The request
+     * @return The next token
+     */
+    private String getNextTokenAfterSlash(HttpServletRequest req)
+    {
+        String path = req.getRequestURI().substring(req.getContextPath().length() + req.getServletPath().length());
+        StringTokenizer tokenizer = new StringTokenizer(path, "/");
+        return tokenizer.nextToken();
     }
 }
