@@ -2,6 +2,7 @@ datanucleus-api-rest
 ====================
 
 Support for DataNucleus persistence using a REST-based API.
+The entry point here is [RestServlet](https://github.com/datanucleus/datanucleus-api-rest/blob/master/src/main/java/org/datanucleus/api/rest/RestServlet.java).
 
 This is built using Maven, by executing `mvn clean install` which installs the built jar in your local Maven repository.
 
