@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
 
+import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
@@ -47,7 +49,6 @@ import org.datanucleus.api.rest.orgjson.JSONException;
 import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.exceptions.ClassNotResolvedException;
 import org.datanucleus.exceptions.NucleusException;
-import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.identity.IdentityUtils;
 import org.datanucleus.metadata.AbstractClassMetaData;
@@ -64,6 +65,7 @@ import org.datanucleus.util.NucleusLogger;
  * <li>DELETE (delete)</li>
  * <li>HEAD (validate)</li>
  * </ul>
+ * TODO Change all usage of NucleusXXXException to JDOException since that is the API being used
  */
 public class RestServlet extends HttpServlet
 {
@@ -287,7 +289,7 @@ public class RestServlet extends HttpServlet
                         }
                         return;
                     }
-                    catch (NucleusUserException e)
+                    catch (NucleusUserException e) // TODO Use JDOException?
                     {
                         JSONObject error = new JSONObject();
                         error.put("exception", e.getMessage());
@@ -307,7 +309,7 @@ public class RestServlet extends HttpServlet
                     }
                     catch (RuntimeException ex)
                     {
-                        // errors from the google appengine may be raised when running queries
+                        // errors from the google appengine may be raised when running queries TODO Remove appengine specific stuff, this should be general
                         JSONObject error = new JSONObject();
                         error.put("exception", ex.getMessage());
                         resp.getWriter().write(error.toString());
@@ -340,13 +342,13 @@ public class RestServlet extends HttpServlet
                     pm.currentTransaction().commit();
                     return;
                 }
-                catch (NucleusObjectNotFoundException ex)
+                catch (JDOObjectNotFoundException ex)
                 {
                     resp.setContentLength(0);
                     resp.setStatus(404);
                     return;
                 }
-                catch (NucleusException ex)
+                catch (JDOException ex)
                 {
                     JSONObject error = new JSONObject();
                     error.put("exception", ex.getMessage());
@@ -469,7 +471,7 @@ public class RestServlet extends HttpServlet
                 throw new RuntimeException(e1);
             }
         }
-        catch (NucleusUserException e)
+        catch (NucleusUserException e) // TODO Use JDOException?
         {
             try
             {
@@ -579,7 +581,7 @@ public class RestServlet extends HttpServlet
                 pm.currentTransaction().commit();
             }
         }
-        catch (NucleusObjectNotFoundException ex)
+        catch (JDOObjectNotFoundException ex)
         {
             try
             {
@@ -588,6 +590,7 @@ public class RestServlet extends HttpServlet
                 resp.getWriter().write(error.toString());
                 resp.setStatus(400);
                 resp.setHeader("Content-Type", "application/json");
+                LOGGER_REST.error("DELETE returned that object didn't exist : " + ex.getMessage(), ex);
                 return;
             }
             catch (JSONException e)
@@ -620,7 +623,7 @@ public class RestServlet extends HttpServlet
                 resp.getWriter().write(error.toString());
                 resp.setStatus(500);
                 resp.setHeader("Content-Type", "application/json");
-                LOGGER_REST.error(e.getMessage(), e);
+                LOGGER_REST.error("Exception on attempted DELETE : " + e.getMessage(), e);
             }
             catch (JSONException e1)
             {
