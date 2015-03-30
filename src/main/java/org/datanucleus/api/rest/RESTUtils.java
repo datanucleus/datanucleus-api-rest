@@ -214,18 +214,17 @@ public class RESTUtils
     {
         if (cmd.getIdentityType() == IdentityType.APPLICATION)
         {
+            ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
             if (cmd.usesSingleFieldIdentityClass())
             {
-                ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
                 Object value = TypeConversionHelper.convertTo(token, cmd.getMetaDataForManagedMemberAtAbsolutePosition(cmd.getPKMemberPositions()[0]).getType());
                 return nucCtx.getIdentityManager().getSingleFieldId(clr.classForName(cmd.getObjectidClass()), clr.classForName(cmd.getFullClassName()), value);
             }
-            // TODO Composite PK?
+            return nucCtx.getIdentityManager().getApplicationId(clr, cmd, token);
         }
         else if (cmd.getIdentityType() == IdentityType.DATASTORE)
         {
-            Class type = MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData());
-            Object value = TypeConversionHelper.convertTo(token, type);
+            Object value = TypeConversionHelper.convertTo(token, MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData()));
             return nucCtx.getIdentityManager().getDatastoreId(cmd.getFullClassName(), value);
         }
         return null;
@@ -241,7 +240,6 @@ public class RESTUtils
      */
     public static Object getNonPersistableObjectFromJSONObject(final JSONObject jsonobj, final Class cls, NucleusContext nucCtx)
     {
-        ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
         if (cls.getName().equals("com.google.appengine.api.users.User"))
         {
             String email = null;
@@ -266,6 +264,7 @@ public class RESTUtils
         }
         else if (cls.getName().equals("com.google.appengine.api.datastore.Key"))
         {
+            ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
             try
             {
                 Object parent = null;
