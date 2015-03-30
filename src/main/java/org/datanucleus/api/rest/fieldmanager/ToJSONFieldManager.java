@@ -171,7 +171,6 @@ public class ToJSONFieldManager extends AbstractFieldManager
             return;
         }
 
-        // TODO Support embedded 1-1, 1-N
         ClassLoaderResolver clr = ec.getClassLoaderResolver();
         AbstractMemberMetaData mmd = cmd.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
         RelationType relationType = mmd.getRelationType(clr);
