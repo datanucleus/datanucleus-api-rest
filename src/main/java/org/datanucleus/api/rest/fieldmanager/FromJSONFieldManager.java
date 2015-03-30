@@ -507,7 +507,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
 
             if (value instanceof JSONObject)
             {
-                // TODO This is not a persistable field, so why do we have JSONObject?
+                // Special typed fields where the object is passed as a JSONObject with multiple values. e.g Google User, Key types
                 JSONObject jsonobj = (JSONObject)value;
                 String fieldType = mmd.getTypeName();
                 if (jsonobj.has("class"))
@@ -520,8 +520,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                 {
                     op.makeDirty(position);
                 }
-                Class cls = clr.classForName(fieldType, true);
-                return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, cls, ec.getNucleusContext());
+                return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, clr.classForName(fieldType, true), ec.getNucleusContext());
             }
 
             if (op != null)
