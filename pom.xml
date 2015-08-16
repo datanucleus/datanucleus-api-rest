@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -9,7 +10,7 @@
     </parent>
 
     <artifactId>datanucleus-api-rest</artifactId>
-    <version>4.1.2-SNAPSHOT</version>
+    <version>4.2.0-m2-SNAPSHOT</version>
 
     <name>DataNucleus REST API plugin</name>
     <description>
@@ -17,9 +18,9 @@
     </description>
 
     <properties>
-        <jdo.version>3.0</jdo.version>
+        <jdo.version>3.2.0-m2</jdo.version>
         <dn.core.version>4.1.3</dn.core.version>
-        <dn.api.jdo.version>4.1.1</dn.api.jdo.version>
+        <dn.api.jdo.version>4.2.0-m2</dn.api.jdo.version>
     </properties>
 
     <scm>
@@ -44,13 +45,13 @@
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-api-jdo</artifactId>
-            <version>[${dn.api.jdo.version}, 4.1.99)</version>
+            <version>[${dn.api.jdo.version}, 4.9)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.jdo</groupId>
-            <artifactId>jdo-api</artifactId>
-            <version>[${jdo.version}, )</version>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>javax.jdo</artifactId>
+            <version>[${jdo.version}, 3.9)</version>
             <scope>provided</scope>
         </dependency>
         <!-- In case we swap out org.json internals for javax.json at some point -->
