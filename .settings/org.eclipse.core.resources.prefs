@@ -1,7 +1,12 @@
 eclipse.preferences.version=1
+<<<<<<< Upstream, based on branch 'master' of git@github.com:datanucleus/datanucleus-api-rest.git
 encoding//src/java=UTF-8
 encoding//src/main/java=UTF-8
 encoding//src/main/resources=UTF-8
+=======
+encoding//src/main/java=UTF-8
+encoding//src/main/resources=UTF-8
+encoding//src/main/resources/META-INF=UTF-8
+>>>>>>> f895106 Add Eclipse formating config/profile to SCM and update project config
 encoding//src/test=UTF-8
 encoding/<project>=UTF-8
-encoding/META-INF=UTF-8
