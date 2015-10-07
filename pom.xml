@@ -18,7 +18,7 @@
 
     <properties>
         <jdo.version>3.0</jdo.version>
-        <dn.core.version>4.1.3</dn.core.version>
+        <dn.core.version>4.1.5</dn.core.version>
         <dn.api.jdo.version>4.1.1</dn.api.jdo.version>
     </properties>
 
