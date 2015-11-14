@@ -18,8 +18,8 @@
 
     <properties>
         <jdo.version>3.2.0-m3</jdo.version>
-        <dn.core.version>4.1.6</dn.core.version>
-        <dn.api.jdo.version>4.2.1</dn.api.jdo.version>
+        <dn.core.version>5.0.0-m1-SNAPSHOT</dn.core.version>
+        <dn.api.jdo.version>5.0.0-m1-SNAPSHOT</dn.api.jdo.version>
     </properties>
 
     <scm>
@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-core</artifactId>
-            <version>[${dn.core.version}, 4.9)</version>
+            <version>[${dn.core.version}, 5.9)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-api-jdo</artifactId>
-            <version>[${dn.api.jdo.version}, 4.9)</version>
+            <version>[${dn.api.jdo.version}, 5.9)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
