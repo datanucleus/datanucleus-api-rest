@@ -342,16 +342,6 @@ public class RestServlet extends HttpServlet
                         resp.setHeader("Content-Type", "application/json");
                         return;
                     }
-                    catch (RuntimeException ex)
-                    {
-                        // errors from the google appengine may be raised when running queries TODO Remove appengine specific stuff, this should be general
-                        JSONObject error = new JSONObject();
-                        error.put("exception", ex.getMessage());
-                        resp.getWriter().write(error.toString());
-                        resp.setStatus(404);
-                        resp.setHeader("Content-Type", "application/json");
-                        return;
-                    }
                 }
 
                 // GET "/{candidateclass}/id" - Find object by id

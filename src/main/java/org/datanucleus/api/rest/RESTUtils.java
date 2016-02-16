@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.JDOFatalUserException;
 
@@ -31,6 +33,9 @@ import org.datanucleus.NucleusContext;
 import org.datanucleus.PersistenceNucleusContext;
 import org.datanucleus.api.rest.fieldmanager.FromJSONFieldManager;
 import org.datanucleus.api.rest.fieldmanager.ToJSONFieldManager;
+import org.datanucleus.api.rest.jsonobject.GoogleAppEngineKeyHandler;
+import org.datanucleus.api.rest.jsonobject.GoogleAppEngineUserHandler;
+import org.datanucleus.api.rest.jsonobject.UserTypeJSONHandler;
 import org.datanucleus.api.rest.orgjson.JSONArray;
 import org.datanucleus.api.rest.orgjson.JSONException;
 import org.datanucleus.api.rest.orgjson.JSONObject;
@@ -230,9 +235,10 @@ public class RESTUtils
         return null;
     }
 
+    private static Map<String, UserTypeJSONHandler> userClassHandlers = new ConcurrentHashMap();
+
     /**
      * Deserialise from JSON to an object. Used for non-persistable classes.
-     * TODO Remove this and make it pluggable so people can provide handlers for their own types. We need a way of going to JSON from one of these types too!
      * @param jsonobj JSONObject
      * @param cls The class
      * @param nucCtx NucleusContext
@@ -240,107 +246,60 @@ public class RESTUtils
      */
     public static Object getNonPersistableObjectFromJSONObject(final JSONObject jsonobj, final Class cls, NucleusContext nucCtx)
     {
+        UserTypeJSONHandler handler = userClassHandlers.get(cls.getName());
+
+        // TODO Make this a plugin point
         if (cls.getName().equals("com.google.appengine.api.users.User"))
         {
-            String email = null;
-            String authDomain = null;
-            try
-            {
-                email = jsonobj.getString("email");
-            }
-            catch (JSONException e)
-            {
-                // should not happen if the field exists
-            }
-            try
-            {
-                authDomain = jsonobj.getString("authDomain");
-            }
-            catch (JSONException e)
-            {
-                // should not happen if the field exists
-            }
-            return ClassUtils.newInstance(cls, new Class[]{String.class, String.class}, new String[]{email, authDomain});
+            handler = new GoogleAppEngineUserHandler();
+            userClassHandlers.put(cls.getName(), handler);
         }
         else if (cls.getName().equals("com.google.appengine.api.datastore.Key"))
         {
-            ClassLoaderResolver clr = nucCtx.getClassLoaderResolver(RestServlet.class.getClassLoader());
-            try
-            {
-                Object parent = null;
-                if (jsonobj.has("parent") && !jsonobj.isNull("parent"))
-                {
-                    //if it's a JSONObject
-                    JSONObject parentobj = jsonobj.getJSONObject("parent");
-                    parent = RESTUtils.getNonPersistableObjectFromJSONObject(parentobj, clr.classForName(jsonobj.getString("class")), nucCtx);
-                }
-                if (jsonobj.has("appId"))
-                {
-                    String appId = jsonobj.getString("appId");
-                    String kind = jsonobj.getString("kind");
-                    Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
-                    if (parent != null)
-                    {
-                        return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls, String.class,String.class}).invoke(null, new Object[]{parent, kind, appId});
-                    }
-
-                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,String.class}).invoke(null, new Object[]{kind, appId});
-                }
-
-                long id = jsonobj.getLong("id");
-                String kind = jsonobj.getString("kind");
-                Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
-                if (parent != null)
-                {
-                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls,String.class,long.class}).invoke(null, new Object[]{parent,kind,Long.valueOf(id)});
-                }
-
-                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,long.class}).invoke(null, new Object[]{kind,Long.valueOf(id)});
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
+            handler = new GoogleAppEngineKeyHandler();
+            userClassHandlers.put(cls.getName(), handler);
         }
-        else
-        {
-            try
-            {
-                return AccessController.doPrivileged(new PrivilegedAction()
-                {
-                    public Object run()
-                    {
-                        try
-                        {
-                            Constructor c = ClassUtils.getConstructorWithArguments(cls, new Class[]{});
-                            c.setAccessible(true);
-                            Object obj = c.newInstance(new Object[]{});
-                            String[] fieldNames = JSONObject.getNames(jsonobj);
-                            for (int i = 0; i < jsonobj.length(); i++)
-                            {
-                                //ignore class field
-                                if (!fieldNames[i].equals("class"))
-                                {
-                                    Field field = cls.getField(fieldNames[i]);
-                                    field.setAccessible(true);
-                                    field.set(obj, jsonobj.get(fieldNames[i]));
-                                }
-                            }
-                            return obj;
-                        }
-                        catch (Exception e)
-                        {
-                            NucleusLogger.GENERAL.error("Exception in conversion from JSONObject field to value", e);
-                        }
-                        return null;
-                    }
-                });
-            }
-            catch (SecurityException ex)
-            {
-                NucleusLogger.DATASTORE_RETRIEVE.warn("Exception in construction of object from JSON", ex);
-            }
 
+        if (handler != null)
+        {
+            return handler.fromJSON(jsonobj, nucCtx);
+        }
+
+        try
+        {
+            return AccessController.doPrivileged(new PrivilegedAction()
+            {
+                public Object run()
+                {
+                    try
+                    {
+                        Constructor c = ClassUtils.getConstructorWithArguments(cls, new Class[]{});
+                        c.setAccessible(true);
+                        Object obj = c.newInstance(new Object[]{});
+                        String[] fieldNames = JSONObject.getNames(jsonobj);
+                        for (int i = 0; i < jsonobj.length(); i++)
+                        {
+                            //ignore class field
+                            if (!fieldNames[i].equals("class"))
+                            {
+                                Field field = cls.getField(fieldNames[i]);
+                                field.setAccessible(true);
+                                field.set(obj, jsonobj.get(fieldNames[i]));
+                            }
+                        }
+                        return obj;
+                    }
+                    catch (Exception e)
+                    {
+                        NucleusLogger.GENERAL.error("Exception in conversion from JSONObject field to value", e);
+                    }
+                    return null;
+                }
+            });
+        }
+        catch (SecurityException ex)
+        {
+            NucleusLogger.DATASTORE_RETRIEVE.warn("Exception in construction of object from JSON", ex);
         }
         return null;
     }
