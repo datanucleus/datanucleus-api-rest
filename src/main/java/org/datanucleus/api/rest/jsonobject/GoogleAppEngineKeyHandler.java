@@ -42,31 +42,30 @@ public class GoogleAppEngineKeyHandler implements UserTypeJSONHandler
                 JSONObject parentobj = jsonobj.getJSONObject("parent");
                 parent = RESTUtils.getNonPersistableObjectFromJSONObject(parentobj, clr.classForName(jsonobj.getString("class")), nucCtx);
             }
+
+            Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
             if (jsonobj.has("appId"))
             {
                 String appId = jsonobj.getString("appId");
                 String kind = jsonobj.getString("kind");
-                Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
                 if (parent != null)
                 {
-                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls, String.class,String.class}).invoke(null, new Object[]{parent, kind, appId});
+                    return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls, String.class, String.class}).invoke(null, new Object[]{parent, kind, appId});
                 }
-
-                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,String.class}).invoke(null, new Object[]{kind, appId});
+                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class, String.class}).invoke(null, new Object[]{kind, appId});
             }
 
             long id = jsonobj.getLong("id");
             String kind = jsonobj.getString("kind");
-            Class keyFactory = clr.classForName("com.google.appengine.api.datastore.KeyFactory", false);
             if (parent != null)
             {
-                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls,String.class,long.class}).invoke(null, new Object[]{parent,kind,Long.valueOf(id)});
+                return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{cls, String.class, long.class}).invoke(null, new Object[]{parent,kind,Long.valueOf(id)});
             }
-
-            return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class,long.class}).invoke(null, new Object[]{kind,Long.valueOf(id)});
+            return ClassUtils.getMethodForClass(keyFactory, "createKey", new Class[]{String.class, long.class}).invoke(null, new Object[]{kind,Long.valueOf(id)});
         }
         catch (Exception e)
         {
+            // TODO Throw something specific
             throw new RuntimeException(e);
         }
     }
