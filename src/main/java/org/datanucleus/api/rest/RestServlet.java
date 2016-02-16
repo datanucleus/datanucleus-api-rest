@@ -243,6 +243,16 @@ public class RestServlet extends HttpServlet
                 }
                 return;
             }
+            else if (token.equalsIgnoreCase("query"))
+            {
+                // GET "/query no longer supported
+                JSONObject error = new JSONObject();
+                error.put("exception", "If using '/query' GET request is not supported. Use '/jdoql' or '/jpql'");
+                resp.getWriter().write(error.toString());
+                resp.setStatus(404);
+                resp.setHeader("Content-Type", "application/json");
+                return;
+            }
             else
             {
                 // GET "/{candidateclass}..."
