@@ -694,18 +694,11 @@ public class RestServlet extends HttpServlet
                 // get the whole extent
                 String queryString = "SELECT FROM " + cmd.getFullClassName();
 
-                String rawQuery = req.getQueryString();
-                if (rawQuery != null)
+                String filterStr = req.getParameter("filter");
+                if (filterStr != null)
                 {
-                    // Query by filter
-                    if (rawQuery.indexOf('&') >= 0)
-                    {
-                        queryString += " WHERE " + URLDecoder.decode(rawQuery.substring(0, rawQuery.indexOf('&')), "UTF-8");
-                    }
-                    else
-                    {
-                        queryString += " WHERE " + URLDecoder.decode(rawQuery, "UTF-8");
-                    }
+                    // Optional filter
+                    queryString += " WHERE " + URLDecoder.decode(filterStr, "UTF-8");
                 }
 
                 PersistenceManager pm = pmf.getPersistenceManager();
