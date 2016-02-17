@@ -30,6 +30,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
@@ -48,8 +49,6 @@ import org.datanucleus.api.rest.orgjson.JSONArray;
 import org.datanucleus.api.rest.orgjson.JSONException;
 import org.datanucleus.api.rest.orgjson.JSONObject;
 import org.datanucleus.exceptions.ClassNotResolvedException;
-import org.datanucleus.exceptions.NucleusException;
-import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.identity.IdentityUtils;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
@@ -65,7 +64,6 @@ import org.datanucleus.util.NucleusLogger;
  * <li>DELETE (delete)</li>
  * <li>HEAD (validate)</li>
  * </ul>
- * TODO Change all usage of NucleusXXXException to JDOException since that is the API being used
  */
 public class RestServlet extends HttpServlet
 {
@@ -132,15 +130,27 @@ public class RestServlet extends HttpServlet
         try
         {
             String token = getNextTokenAfterSlash(req);
-            if (token.equalsIgnoreCase("query") || token.equalsIgnoreCase("jdoql"))
+            if (token.equalsIgnoreCase("jdoql"))
             {
-                // GET "/query?the_query_details" or GET "/jdoql?the_query_details" where "the_query_details" is "SELECT FROM ... WHERE ... ORDER BY ..."
+                // GET "/jdoql?query=the_query_details" where "the_query_details" is (encoded) "SELECT FROM ... WHERE ... ORDER BY ..."
+                String jdoqlStr = req.getParameter("query");
+                if (jdoqlStr == null)
+                {
+                    // No query provided
+                    JSONObject error = new JSONObject();
+                    error.put("exception", "If using '/jdoql' GET request, must provide query parameter with encoded form of JDOQL query");
+                    resp.getWriter().write(error.toString());
+                    resp.setStatus(404);
+                    resp.setHeader("Content-Type", "application/json");
+                    return;
+                }
+
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
 
-                    String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
+                    String queryString = URLDecoder.decode(jdoqlStr, "UTF-8");
                     Query query = pm.newQuery("JDOQL", queryString);
                     if (fetchGroup != null)
                     {
@@ -178,13 +188,26 @@ public class RestServlet extends HttpServlet
             }
             else if (token.equalsIgnoreCase("jpql"))
             {
+                // GET "/jpql?query=the_query_details" where "the_query_details" is (encoded) "SELECT p FROM ... p WHERE ... ORDER BY ..."
+                String jpqlStr = req.getParameter("query");
+                if (jpqlStr == null)
+                {
+                    // No query provided
+                    JSONObject error = new JSONObject();
+                    error.put("exception", "If using '/jpql' GET request, must provide query parameter with encoded form of JPQL query");
+                    resp.getWriter().write(error.toString());
+                    resp.setStatus(404);
+                    resp.setHeader("Content-Type", "application/json");
+                    return;
+                }
+
                 // GET "/jpql?the_query_details" where "the_query_details" is "SELECT ... FROM ... WHERE ... ORDER BY ..."
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
                     pm.currentTransaction().begin();
 
-                    String queryString = URLDecoder.decode(req.getQueryString(), "UTF-8");
+                    String queryString = URLDecoder.decode(jpqlStr, "UTF-8");
                     Query query = pm.newQuery("JPQL", queryString);
                     if (fetchGroup != null)
                     {
@@ -220,6 +243,16 @@ public class RestServlet extends HttpServlet
                 }
                 return;
             }
+            else if (token.equalsIgnoreCase("query"))
+            {
+                // GET "/query no longer supported
+                JSONObject error = new JSONObject();
+                error.put("exception", "If using '/query' GET request is not supported. Use '/jdoql' or '/jpql'");
+                resp.getWriter().write(error.toString());
+                resp.setStatus(404);
+                resp.setHeader("Content-Type", "application/json");
+                return;
+            }
             else
             {
                 // GET "/{candidateclass}..."
@@ -246,7 +279,7 @@ public class RestServlet extends HttpServlet
                 Object id = getId(req);
                 if (id == null)
                 {
-                    // Find objects by type or by query
+                    // GET "/{candidateclass}[?filter={the_filter}]" where "the_filter" is (encoded) "paramX == val1 && paramY == val2 ..."
                     try
                     {
                         PersistenceManager pm = pmf.getPersistenceManager();
@@ -264,13 +297,15 @@ public class RestServlet extends HttpServlet
                             pm.currentTransaction().begin();
 
                             // get the whole extent for this candidate
-                            String queryString = "SELECT FROM " + cmd.getFullClassName();
-                            if (req.getQueryString() != null)
+                            String jdoqlStr = "SELECT FROM " + cmd.getFullClassName();
+                            String filterStr = req.getParameter("filter");
+                            if (filterStr != null)
                             {
-                                // query by filter for this candidate
-                                queryString += " WHERE " + URLDecoder.decode(req.getQueryString(), "UTF-8");
+                                // Optional filter
+                                jdoqlStr += " WHERE " + URLDecoder.decode(filterStr, "UTF-8");
                             }
-                            Query query = pm.newQuery("JDOQL", queryString);
+
+                            Query query = pm.newQuery("JDOQL", jdoqlStr);
                             List result = (List)query.execute();
                             JSONArray jsonobj = RESTUtils.getJSONArrayFromCollection(result, ((JDOPersistenceManager)pm).getExecutionContext());
                             writeResponse(resp, jsonobj.toString(), compress);
@@ -289,7 +324,7 @@ public class RestServlet extends HttpServlet
                         }
                         return;
                     }
-                    catch (NucleusUserException e) // TODO Use JDOException?
+                    catch (JDOUserException e)
                     {
                         JSONObject error = new JSONObject();
                         error.put("exception", e.getMessage());
@@ -298,18 +333,8 @@ public class RestServlet extends HttpServlet
                         resp.setHeader("Content-Type", "application/json");
                         return;
                     }
-                    catch (NucleusException ex)
+                    catch (JDOException ex)
                     {
-                        JSONObject error = new JSONObject();
-                        error.put("exception", ex.getMessage());
-                        resp.getWriter().write(error.toString());
-                        resp.setStatus(404);
-                        resp.setHeader("Content-Type", "application/json");
-                        return;
-                    }
-                    catch (RuntimeException ex)
-                    {
-                        // errors from the google appengine may be raised when running queries TODO Remove appengine specific stuff, this should be general
                         JSONObject error = new JSONObject();
                         error.put("exception", ex.getMessage());
                         resp.getWriter().write(error.toString());
@@ -471,7 +496,7 @@ public class RestServlet extends HttpServlet
                 throw new RuntimeException(e1);
             }
         }
-        catch (NucleusUserException e) // TODO Use JDOException?
+        catch (JDOUserException e)
         {
             try
             {
@@ -487,7 +512,7 @@ public class RestServlet extends HttpServlet
                 throw new RuntimeException(e1);
             }
         }
-        catch (NucleusException e)
+        catch (JDOException e)
         {
             try
             {
@@ -598,7 +623,7 @@ public class RestServlet extends HttpServlet
                 // will not happen
             }
         }
-        catch (NucleusUserException e)
+        catch (JDOUserException e)
         {
             try
             {
@@ -614,7 +639,7 @@ public class RestServlet extends HttpServlet
                 // ignore
             }
         }
-        catch (NucleusException e)
+        catch (JDOException e)
         {
             try
             {
@@ -663,16 +688,19 @@ public class RestServlet extends HttpServlet
         Object id = getId(req);
         if (id == null)
         {
-            // no id provided
+            // no id provided!
             try
             {
                 // get the whole extent
                 String queryString = "SELECT FROM " + cmd.getFullClassName();
-                if (req.getQueryString() != null)
+
+                String filterStr = req.getParameter("filter");
+                if (filterStr != null)
                 {
-                    // query by filter
-                    queryString += " WHERE " + URLDecoder.decode(req.getQueryString(), "UTF-8");
+                    // Optional filter
+                    queryString += " WHERE " + URLDecoder.decode(filterStr, "UTF-8");
                 }
+
                 PersistenceManager pm = pmf.getPersistenceManager();
                 try
                 {
@@ -692,12 +720,12 @@ public class RestServlet extends HttpServlet
                 }
                 return;
             }
-            catch (NucleusUserException e)
+            catch (JDOUserException e)
             {
                 resp.setStatus(400);
                 return;
             }
-            catch (NucleusException ex)
+            catch (JDOException ex)
             {
                 resp.setStatus(404);
                 return;
@@ -718,7 +746,7 @@ public class RestServlet extends HttpServlet
             pm.currentTransaction().commit();
             return;
         }
-        catch (NucleusException ex)
+        catch (JDOException ex)
         {
             resp.setStatus(404);
             return;
