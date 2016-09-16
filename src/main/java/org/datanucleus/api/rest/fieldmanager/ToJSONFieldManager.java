@@ -184,7 +184,7 @@ public class ToJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasCollection())
             {
-                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr);
                 JSONArray arr = new JSONArray();
                 Collection collVal = (Collection)value;
                 int i = 0;
@@ -203,7 +203,7 @@ public class ToJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasArray())
             {
-                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr);
                 JSONArray arr = new JSONArray();
                 for (int i=0;i<Array.getLength(value);i++)
                 {
@@ -221,8 +221,8 @@ public class ToJSONFieldManager extends AbstractFieldManager
             }
             else if (mmd.hasMap())
             {
-                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
-                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr);
+                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr);
                 Map jsonMap = new HashMap();
                 Iterator<Map.Entry> mapIter = ((Map)value).entrySet().iterator();
                 while (mapIter.hasNext())

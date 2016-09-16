@@ -350,7 +350,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     throw new NucleusDataStoreException("Exception creating container for field " + mmd.getFullFieldName(), e);
                 }
 
-                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData elemCmd = mmd.getCollection().getElementClassMetaData(clr);
                 Class elemCls = clr.classForName(mmd.getCollection().getElementType());
                 for (int i=0; i<array.length(); i++)
                 {
@@ -396,7 +396,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
                 JSONArray array = (JSONArray)value;
                 Object arr = Array.newInstance(mmd.getType().getComponentType(), array.length());
 
-                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData elemCmd = mmd.getArray().getElementClassMetaData(clr);
                 Class elemCls = clr.classForName(mmd.getCollection().getElementType());
                 for (int i=0; i<array.length(); i++)
                 {
@@ -452,8 +452,8 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     throw new NucleusDataStoreException(e.getMessage(), e);
                 }
 
-                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr, ec.getMetaDataManager());
-                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr, ec.getMetaDataManager());
+                AbstractClassMetaData keyCmd = mmd.getMap().getKeyClassMetaData(clr);
+                AbstractClassMetaData valCmd = mmd.getMap().getValueClassMetaData(clr);
                 Class keyCls = clr.classForName(mmd.getMap().getKeyType());
                 Class valCls = clr.classForName(mmd.getMap().getValueType());
                 Iterator keyIter = jsonobj.keys();
