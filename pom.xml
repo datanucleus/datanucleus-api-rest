@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-core</artifactId>
-            <version>[${dn.core.version}, 5.9)</version>
+            <version>[${dn.core.version}, 5.0.99)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-api-jdo</artifactId>
-            <version>[${dn.api.jdo.version}, 5.9)</version>
+            <version>[${dn.api.jdo.version}, 5.0.99)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
