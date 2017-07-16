@@ -18,8 +18,8 @@
 
     <properties>
         <jdo.version>3.2.0-m7</jdo.version>
-        <dn.core.version>5.1.0-m4</dn.core.version>
-        <dn.api.jdo.version>5.1.0-m4</dn.api.jdo.version>
+        <dn.core.version>5.1.0-release</dn.core.version>
+        <dn.api.jdo.version>5.1.0-release</dn.api.jdo.version>
     </properties>
 
     <scm>
