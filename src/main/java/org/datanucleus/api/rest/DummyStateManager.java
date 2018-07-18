@@ -181,7 +181,7 @@ public class DummyStateManager implements StateManager
         return null;
     }
 
-    public ExecutionContextReference getExecutionContext(Persistable arg0)
+    public ExecutionContextReference getExecutionContextReference()
     {
         return null;
     }
