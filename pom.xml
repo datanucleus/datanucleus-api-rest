@@ -17,9 +17,9 @@
     </description>
 
     <properties>
-        <jdo.version>3.2.0-m7</jdo.version>
-        <dn.core.version>5.2.0-m1-SNAPSHOT</dn.core.version>
-        <dn.api.jdo.version>5.2.0-m1-SNAPSHOT</dn.api.jdo.version>
+        <jdo.version>3.2.0-m9</jdo.version>
+        <dn.core.version>5.2.0-m1</dn.core.version>
+        <dn.api.jdo.version>5.2.0-m1</dn.api.jdo.version>
     </properties>
 
     <scm>
