@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.datanucleus</groupId>
         <artifactId>datanucleus-maven-parent</artifactId>
-        <version>5.0.0</version>
+        <version>6.0.0-m1</version>
     </parent>
 
     <artifactId>datanucleus-api-rest</artifactId>
-    <version>5.2.1-SNAPSHOT</version>
+    <version>6.0.0-m1-SNAPSHOT</version>
 
     <name>DataNucleus REST API plugin</name>
     <description>
@@ -17,9 +17,9 @@
     </description>
 
     <properties>
-        <jdo.version>3.2.0-m11</jdo.version>
-        <dn.core.version>5.2.0-release</dn.core.version>
-        <dn.api.jdo.version>5.2.0-release</dn.api.jdo.version>
+        <jdo.version>3.2.0-m13</jdo.version>
+        <dn.core.version>5.9</dn.core.version>
+        <dn.api.jdo.version>5.9</dn.api.jdo.version>
     </properties>
 
     <scm>
@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-core</artifactId>
-            <version>[${dn.core.version}, 5.9)</version>
+            <version>[${dn.core.version}, 6.9)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-api-jdo</artifactId>
-            <version>[${dn.api.jdo.version}, 5.9)</version>
+            <version>[${dn.api.jdo.version}, 6.9)</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
