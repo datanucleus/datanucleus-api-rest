@@ -37,9 +37,9 @@ import org.datanucleus.metadata.RelationType;
 import org.datanucleus.state.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.SCOUtils;
+import org.datanucleus.store.types.converters.TypeConversionHelper;
 import org.datanucleus.util.NucleusLogger;
 import org.datanucleus.util.StringUtils;
-import org.datanucleus.util.TypeConversionHelper;
 
 /**
  * FieldManager responsible for accessing the values from a JSONObject, and putting into a POJO.
