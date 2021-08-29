@@ -168,7 +168,7 @@ public class RESTUtils
             // Datastore identity - assumed to be in a property "_id"
             try
             {
-                if (MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData()) == String.class)
+                if (MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseDatastoreIdentityMetaData()) == String.class)
                 {
                     id = ec.getNucleusContext().getIdentityManager().getDatastoreId(className, jsonobj.getString("_id"));
                 }
@@ -229,7 +229,7 @@ public class RESTUtils
         }
         else if (cmd.getIdentityType() == IdentityType.DATASTORE)
         {
-            Object value = TypeConversionHelper.convertTo(token, MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseIdentityMetaData()));
+            Object value = TypeConversionHelper.convertTo(token, MetaDataUtils.getTypeOfDatastoreIdentity(cmd.getBaseDatastoreIdentityMetaData()));
             return nucCtx.getIdentityManager().getDatastoreId(cmd.getFullClassName(), value);
         }
         return null;
