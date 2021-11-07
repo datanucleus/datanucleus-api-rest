@@ -45,7 +45,7 @@ import org.datanucleus.identity.IdentityUtils;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.IdentityType;
 import org.datanucleus.metadata.MetaDataUtils;
-import org.datanucleus.state.ObjectProvider;
+import org.datanucleus.state.DNStateManager;
 import org.datanucleus.store.fieldmanager.FieldManager;
 import org.datanucleus.store.types.converters.TypeConversionHelper;
 import org.datanucleus.util.ClassUtils;
@@ -109,9 +109,9 @@ public class RESTUtils
         }
 
         // Copy all FetchPlan fields into the object
-        ObjectProvider op = ec.findObjectProvider(obj);
+        DNStateManager sm = ec.findStateManager(obj);
         FieldManager fm = new ToJSONFieldManager(jsonobj, cmd, ec);
-        op.provideFields(ec.getFetchPlan().getFetchPlanForClass(cmd).getMemberNumbers(), fm);
+        sm.provideFields(ec.getFetchPlan().getFetchPlanForClass(cmd).getMemberNumbers(), fm);
 
         return jsonobj;
     }
@@ -188,9 +188,9 @@ public class RESTUtils
             try
             {
                 Object pc = ec.findObject(id, true, false, cmd.getFullClassName());
-                ObjectProvider pcOP = ec.findObjectProvider(pc);
-                FieldManager fm2 = new FromJSONFieldManager(jsonobj, cmd, pcOP);
-                pcOP.replaceFields(cmd.getAllMemberPositions(), fm2);
+                DNStateManager pcSM = ec.findStateManager(pc);
+                FieldManager fm2 = new FromJSONFieldManager(jsonobj, cmd, pcSM);
+                pcSM.replaceFields(cmd.getAllMemberPositions(), fm2);
                 return pc;
             }
             catch (NucleusException ne)

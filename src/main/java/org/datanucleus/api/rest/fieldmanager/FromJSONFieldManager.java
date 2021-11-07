@@ -34,7 +34,7 @@ import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.RelationType;
-import org.datanucleus.state.ObjectProvider;
+import org.datanucleus.state.DNStateManager;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.SCOUtils;
 import org.datanucleus.store.types.converters.TypeConversionHelper;
@@ -49,7 +49,7 @@ public class FromJSONFieldManager extends AbstractFieldManager
     JSONObject jsonobj;
     AbstractClassMetaData cmd;
     ExecutionContext ec;
-    ObjectProvider op;
+    DNStateManager sm;
 
     /**
      * @param jsonobj The JSON Object that we are processing the values for.
@@ -63,12 +63,12 @@ public class FromJSONFieldManager extends AbstractFieldManager
         this.ec = ec;
     }
 
-    public FromJSONFieldManager(JSONObject jsonobj, AbstractClassMetaData cmd, ObjectProvider op)
+    public FromJSONFieldManager(JSONObject jsonobj, AbstractClassMetaData cmd, DNStateManager sm)
     {
         this.jsonobj = jsonobj;
         this.cmd = cmd;
-        this.op = op;
-        this.ec = op.getExecutionContext();
+        this.sm = sm;
+        this.ec = sm.getExecutionContext();
     }
 
     public boolean fetchBooleanField(int position)
@@ -81,9 +81,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             boolean val = jsonobj.getBoolean(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -109,9 +109,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
             {
                 value = str.getBytes()[0];
             }
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return value;
         }
@@ -137,9 +137,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
             {
                 value = str.charAt(0);
             }
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return value;
         }
@@ -160,9 +160,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             double val = jsonobj.getDouble(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -183,9 +183,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             float val = (float) jsonobj.getDouble(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -206,9 +206,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             int val = jsonobj.getInt(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -229,9 +229,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             long val = jsonobj.getLong(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -252,9 +252,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             short val = (short) jsonobj.getInt(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -275,9 +275,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         try
         {
             String val = jsonobj.getString(fieldName);
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return val;
         }
@@ -300,9 +300,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
         {
             if (jsonobj.isNull(mmd.getName()))
             {
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return null;
             }
@@ -325,9 +325,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     fieldType = jsonobj.getString("class");
                 }
 
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return RESTUtils.getObjectFromJSONObject((JSONObject)value, fieldType, ec);
             }
@@ -380,9 +380,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     }
                 }
 
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return coll;
             }
@@ -426,9 +426,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     }
                 }
 
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return arr;
             }
@@ -498,9 +498,9 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     map.put(key, val);
                 }
 
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return map;
             }
@@ -516,16 +516,16 @@ public class FromJSONFieldManager extends AbstractFieldManager
                     fieldType = jsonobj.getString("class");
                 }
 
-                if (op != null)
+                if (sm != null)
                 {
-                    op.makeDirty(position);
+                    sm.makeDirty(position);
                 }
                 return RESTUtils.getNonPersistableObjectFromJSONObject(jsonobj, clr.classForName(fieldType, true), ec.getNucleusContext());
             }
 
-            if (op != null)
+            if (sm != null)
             {
-                op.makeDirty(position);
+                sm.makeDirty(position);
             }
             return TypeConversionHelper.convertTo(value, cmd.getMetaDataForManagedMemberAtAbsolutePosition(position).getType());
         }
